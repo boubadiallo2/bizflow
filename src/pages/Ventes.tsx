@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar } from 'lucide-react';
+import { Search, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar, X } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { salesService } from '../services/apiService';
@@ -13,6 +13,7 @@ interface Sale {
   itemsCount: number;
   method: string;
   status: string;
+  cartItems?: any[];
 }
 
 export const Ventes: React.FC = () => {
@@ -21,6 +22,7 @@ export const Ventes: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [, setLoading] = useState(true);
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
   useEffect(() => {
     const loadSales = async () => {
@@ -184,6 +186,7 @@ export const Ventes: React.FC = () => {
                 <th>Montant</th>
                 <th>Paiement</th>
                 <th>Statut</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -199,16 +202,91 @@ export const Ventes: React.FC = () => {
                       })}
                     </div>
                   </td>
-                  <td>{sale.itemsCount} article(s)</td>
+                  <td>
+                    {sale.cartItems && sale.cartItems.length > 0 
+                      ? sale.cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0)
+                      : sale.itemsCount} article(s)
+                  </td>
                   <td style={{ fontWeight: 600 }}>{sale.amount.toLocaleString('fr-FR')} F</td>
                   <td>{sale.method}</td>
                   <td>
                     <span className="status-badge success">{sale.status}</span>
                   </td>
+                  <td>
+                    <Button variant="outline" onClick={() => setSelectedSale(sale)} style={{ padding: '4px 8px', fontSize: '0.85rem' }}>Détails</Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Sale Details Modal */}
+      {selectedSale && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3>Détails du Ticket {selectedSale.ticketId}</h3>
+              <button className="close-btn" onClick={() => setSelectedSale(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: '4px 0', color: 'var(--color-text-muted)' }}>Date</p>
+                  <p style={{ fontWeight: 500 }}>{new Date(selectedSale.date).toLocaleString('fr-FR')}</p>
+                </div>
+                <div>
+                  <p style={{ margin: '4px 0', color: 'var(--color-text-muted)' }}>Paiement</p>
+                  <p style={{ fontWeight: 500 }}>{selectedSale.method}</p>
+                </div>
+                <div>
+                  <p style={{ margin: '4px 0', color: 'var(--color-text-muted)' }}>Montant Total</p>
+                  <p style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{selectedSale.amount.toLocaleString('fr-FR')} F</p>
+                </div>
+              </div>
+              
+              <h4 style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--color-border)' }}>Articles vendus</h4>
+              
+              {selectedSale.cartItems && selectedSale.cartItems.length > 0 ? (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
+                    <thead>
+                      <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                        <th style={{ padding: '12px 8px', fontWeight: 500 }}>Produit</th>
+                        <th style={{ padding: '12px 8px', textAlign: 'center', fontWeight: 500 }}>Qté</th>
+                        <th style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 500 }}>Prix unitaire</th>
+                        <th style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 500 }}>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedSale.cartItems.map((item: any, idx: number) => (
+                        <tr key={idx} style={{ borderBottom: '1px dashed var(--color-border)' }}>
+                          <td style={{ padding: '12px 8px' }}>{item.productName || 'Produit inconnu'}</td>
+                          <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                            <span style={{ backgroundColor: 'var(--color-bg-alt)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.85rem' }}>
+                              {item.quantity}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 8px', textAlign: 'right' }}>{(item.priceValue || 0).toLocaleString('fr-FR')} F</td>
+                          <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 500 }}>{(item.quantity * (item.priceValue || 0)).toLocaleString('fr-FR')} F</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{ padding: '24px', textAlign: 'center', backgroundColor: 'var(--color-bg-alt)', borderRadius: 'var(--radius-md)' }}>
+                  <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>Aucun détail d'article disponible pour cette vente.</p>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer" style={{ borderTop: '1px solid var(--color-border)', paddingTop: '16px', marginTop: '16px' }}>
+              <Button variant="secondary" onClick={() => setSelectedSale(null)} style={{ marginLeft: 'auto' }}>Fermer</Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

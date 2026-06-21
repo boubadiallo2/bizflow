@@ -267,7 +267,7 @@ export const PointDeVente: React.FC = () => {
       amount: total,
       tendered: amountTendered,
       change: change,
-      itemsCount: cart.length,
+      itemsCount: cart.reduce((sum, item) => sum + item.quantity, 0),
       method: paymentMethod,
       status: 'Complété',
       cartItems: cart.map(item => ({
