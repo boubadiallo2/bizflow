@@ -100,7 +100,7 @@ export const AdminDashboard: React.FC = () => {
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(value) => `${value / 1000}k`} />
                 <Tooltip 
-                  formatter={(value: number) => [`${value.toLocaleString('fr-FR')} F`, 'Revenu']}
+                  formatter={(value: any) => [`${value.toLocaleString('fr-FR')} F`, 'Revenu']}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                 />
                 <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#bfdbfe" strokeWidth={3} />

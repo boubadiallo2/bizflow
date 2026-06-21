@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Monitor, FileText, Package, Banknote, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, FileText, Banknote, AlertTriangle } from 'lucide-react';
 import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+
 import { productsService, salesService } from '../services/apiService';
 import './Dashboard.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';

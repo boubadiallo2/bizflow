@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ShoppingCart, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar } from 'lucide-react';
+import { Search, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { salesService } from '../services/apiService';
@@ -19,7 +19,7 @@ export const Ventes: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [sales, setSales] = useState<Sale[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSales = async () => {

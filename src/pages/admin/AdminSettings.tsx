@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, Settings, CreditCard, Shield, Globe, Bell, Server } from 'lucide-react';
+import { Save, CreditCard, Shield, Globe, Bell, Server } from 'lucide-react';
 import { Button } from '../../components/Button';
 import './AdminSettings.css';
 
