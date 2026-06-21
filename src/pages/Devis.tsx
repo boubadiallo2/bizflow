@@ -38,6 +38,7 @@ export const Devis: React.FC = () => {
   const [lines, setLines] = useState<LineItem[]>([
     { id: Date.now(), productId: '', quantity: 1, unitPrice: 0 }
   ]);
+  const [applyTva, setApplyTva] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -69,6 +70,7 @@ export const Devis: React.FC = () => {
     setLines([{ id: Date.now(), productId: '', quantity: 1, unitPrice: 0 }]);
     setClient('');
     setValidityDate('');
+    setApplyTva(true);
     setEditingQuoteId(null);
   };
 
@@ -102,7 +104,7 @@ export const Devis: React.FC = () => {
 
   // Calculations
   const totalHT = lines.reduce((sum, line) => sum + (line.quantity * line.unitPrice), 0);
-  const tva = totalHT * 0.18;
+  const tva = applyTva ? totalHT * 0.18 : 0;
   const totalTTC = totalHT + tva;
 
   const handleGenerateQuote = async () => {
@@ -146,6 +148,7 @@ export const Devis: React.FC = () => {
     setClient(quote.client);
     setValidityDate(quote.date);
     setLines([...quote.lines]);
+    setApplyTva(quote.tva > 0);
     setEditingQuoteId(quote.id);
     setIsCreating(true);
   };
@@ -374,7 +377,16 @@ export const Devis: React.FC = () => {
               <span>{formatCurrency(totalHT)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', color: 'var(--color-text-muted)' }}>
-              <span>TVA (18%)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="checkbox" 
+                  id="applyTva" 
+                  checked={applyTva} 
+                  onChange={(e) => setApplyTva(e.target.checked)} 
+                  style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                />
+                <label htmlFor="applyTva" style={{ cursor: 'pointer', userSelect: 'none' }}>Appliquer la TVA (18%)</label>
+              </div>
               <span>{formatCurrency(tva)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', fontSize: '1.25rem', fontWeight: 700 }}>
