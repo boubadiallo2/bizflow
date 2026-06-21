@@ -271,9 +271,14 @@ app.get('/api/sales', authenticateToken, requireTenant, async (req, res) => {
 
 app.post('/api/sales', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const newItem = await db.insert(sales).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
+    const payload = { ...req.body, tenantId: req.user!.tenantId! };
+    if (payload.date) {
+      payload.date = new Date(payload.date);
+    }
+    const newItem = await db.insert(sales).values(payload).returning();
     res.json(newItem[0]);
   } catch (err: any) {
+    console.error('Erreur POST /api/sales:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -281,12 +286,17 @@ app.post('/api/sales', authenticateToken, requireTenant, async (req, res) => {
 app.put('/api/sales/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    const payload = { ...req.body };
+    if (payload.date) {
+      payload.date = new Date(payload.date);
+    }
     const updated = await db.update(sales)
-      .set(req.body)
+      .set(payload)
       .where(and(eq(sales.id, id), eq(sales.tenantId, req.user!.tenantId!)))
       .returning();
     res.json(updated[0]);
   } catch (err: any) {
+    console.error('Erreur PUT /api/sales:', err);
     res.status(500).json({ error: err.message });
   }
 });
