@@ -29,7 +29,7 @@ app.get('/api/health', (req, res) => {
 // --- AUTHENTICATION ---
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, name, commerceType } = req.body;
+    const { email, password, name, company, commerceType, phone, city, address, country } = req.body;
     
     // Check if user exists
     const existingUsers = await db.select().from(users).where(eq(users.email, email));
@@ -39,8 +39,8 @@ app.post('/api/auth/register', async (req, res) => {
 
     // Create Tenant
     const newTenant = await db.insert(tenants).values({
-      name: name + ' (Entreprise)',
-      commerceType: commerceType || 'Commerce',
+      name: company || name + ' (Entreprise)',
+      commerceType: commerceType || 'Autre',
       subscription: 'Starter',
       status: 'Actif',
     }).returning();
@@ -54,6 +54,19 @@ app.post('/api/auth/register', async (req, res) => {
       name,
       role: 'Admin', // L'utilisateur créateur est Admin de son tenant
     }).returning();
+
+    // Initialize Settings for this tenant
+    await db.insert(settings).values({
+      tenantId: newTenant[0].id,
+      name: company || name + ' (Entreprise)',
+      ownerName: name,
+      commerceType: commerceType || 'Autre',
+      email: email,
+      phone: phone || '',
+      city: city || '',
+      address: address || '',
+      country: country || 'sn',
+    });
 
     res.status(201).json({ success: true, message: 'Inscription réussie.' });
   } catch (err: any) {

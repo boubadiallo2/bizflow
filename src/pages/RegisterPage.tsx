@@ -11,6 +11,10 @@ export const RegisterPage: React.FC = () => {
     email: '',
     password: '',
     commerceType: '',
+    phone: '',
+    city: '',
+    address: '',
+    country: 'sn',
     selectedProducts: [] as string[]
   });
   const [error, setError] = useState('');
@@ -75,7 +79,11 @@ export const RegisterPage: React.FC = () => {
         company: formData.company,
         commerceType: formData.commerceType,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        phone: formData.phone,
+        city: formData.city,
+        address: formData.address,
+        country: formData.country
       });
       navigate('/login');
     } catch (err: any) {
@@ -174,6 +182,55 @@ export const RegisterPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          <div className="form-row" style={{ display: 'flex', gap: '16px' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label htmlFor="country">Pays</label>
+              <select
+                id="country"
+                value={formData.country}
+                onChange={handleChange}
+                required
+              >
+                <option value="sn">Sénégal</option>
+                <option value="ml">Mali</option>
+                <option value="ci">Côte d'Ivoire</option>
+                <option value="gn">Guinée</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label htmlFor="city">Ville</label>
+              <input
+                type="text"
+                id="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="Ex: Dakar"
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phone">Téléphone</label>
+            <input
+              type="tel"
+              id="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Ex: 77 000 00 00"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="address">Adresse</label>
+            <input
+              type="text"
+              id="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Ex: 123 Rue de la République"
+            />
+          </div>
 
           <div className="form-group">
             <label htmlFor="password">Mot de passe</label>
