@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api';
+const API_URL = '/api';
 
 // ==========================================
 // Service CRUD générique pour API REST
