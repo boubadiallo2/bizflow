@@ -32,6 +32,17 @@ export const Facturation: React.FC = () => {
   const [lines, setLines] = useState<InvoiceLine[]>([
     { id: Date.now().toString(), productId: '', productName: '', quantity: 1, unitPrice: 0 }
   ]);
+  const [commerceType, setCommerceType] = useState('');
+  const [companySettings, setCompanySettings] = useState<any>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<any>(null);
+  const [opticData, setOpticData] = useState({
+    od: '',
+    og: '',
+    add: '',
+    monture: false,
+    verre: false,
+    avance: 0,
+  });
 
   const handleAddLine = () => {
     setLines([...lines, { id: Date.now().toString(), productId: '', productName: '', quantity: 1, unitPrice: 0 }]);
@@ -68,16 +79,150 @@ export const Facturation: React.FC = () => {
   const totalTTC = montantHT + tva;
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
       try {
-        const data = await productsService.getAll();
-        setProducts(data as ProductItem[]);
+        const [productsData, settingsData] = await Promise.all([
+          productsService.getAll(),
+          import('../services/apiService').then(m => m.settingsService.get())
+        ]);
+        setProducts(productsData as ProductItem[]);
+        if (settingsData) {
+          setCompanySettings(settingsData);
+          if (settingsData.commerceType) {
+            setCommerceType(settingsData.commerceType);
+          }
+        }
       } catch (e) {
-        console.error('Erreur chargement produits facturation:', e);
+        console.error('Erreur chargement données facturation:', e);
       }
     };
-    loadProducts();
+    loadData();
   }, []);
+
+  const handleCreateInvoice = () => {
+    if (commerceType === 'Optique / Lunetterie') {
+      const invoiceData = {
+        date: new Date().toISOString(),
+        amount: totalTTC,
+        opticData: {
+          ...opticData,
+          reste: totalTTC - (opticData.avance || 0)
+        }
+      };
+      setViewingInvoice(invoiceData);
+    } else {
+      setIsCreating(false);
+    }
+  };
+
+  if (viewingInvoice && commerceType === 'Optique / Lunetterie') {
+    const optic = viewingInvoice.opticData || {};
+    const subtotal = viewingInvoice.amount;
+    
+    return (
+      <div className="print-view-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--color-bg)', zIndex: 100, overflowY: 'auto', padding: '20px' }}>
+        <div className="no-print" style={{ marginBottom: '24px', display: 'flex', gap: '16px', maxWidth: '210mm', margin: '0 auto 24px auto' }}>
+          <Button variant="secondary" onClick={() => { setViewingInvoice(null); setIsCreating(false); }} icon={<ArrowLeft size={18} />}>Terminer</Button>
+          <Button variant="primary" onClick={() => { setTimeout(() => window.print(), 100); }} icon={<FileText size={18} />}>Imprimer</Button>
+        </div>
+        
+        <div className="optic-invoice-document" style={{ width: '210mm', minHeight: '297mm', padding: '20mm', margin: '0 auto', backgroundColor: 'white', color: '#00a3e0', fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
+          
+          <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+            {companySettings?.logo ? (
+              <img src={companySettings.logo} alt="Logo" style={{ maxHeight: '100px' }} />
+            ) : (
+              <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 'bold' }}>{companySettings?.name}</h1>
+            )}
+          </div>
+          
+          <div style={{ backgroundColor: '#00a3e0', color: 'white', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: '18px', marginBottom: '20px' }}>
+            Vente de lunettes Médicales - Lunettes Photogray Antireflet - Lunettes de Soleil
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ backgroundColor: '#00a3e0', color: 'white', padding: '5px 15px', fontWeight: 'bold', fontSize: '20px' }}>
+              FACTURE
+            </div>
+            <div style={{ fontSize: '16px' }}>
+              Date : <span style={{ borderBottom: '1px dotted #00a3e0', display: 'inline-block', width: '150px', textAlign: 'center', color: 'black' }}>{new Date(viewingInvoice.date).toLocaleDateString('fr-FR')}</span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', marginBottom: '20px', fontSize: '16px', lineHeight: '1.5' }}>
+            <div style={{ flex: 1, display: 'flex' }}>
+              <span style={{ whiteSpace: 'nowrap' }}>M.</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, marginLeft: '10px' }}></span>
+            </div>
+            <div style={{ flex: 1, display: 'flex', marginLeft: '20px' }}>
+              <span style={{ whiteSpace: 'nowrap' }}>Tél :</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, marginLeft: '10px' }}></span>
+            </div>
+          </div>
+          
+          <div style={{ fontSize: '16px', lineHeight: '2' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
+                {optic.monture && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+              </div>
+              <span style={{ width: '80px' }}>Monture</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1 }}></span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
+                {optic.verre && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+              </div>
+              <span style={{ width: '80px' }}>Verre</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1 }}></span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ width: '110px', paddingLeft: '30px' }}>OD</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.od}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ width: '110px', paddingLeft: '30px' }}>OG</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.og}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
+                {optic.add && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+              </div>
+              <span style={{ width: '120px' }}>Progressif ADD</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.add && optic.add !== 'Oui' ? optic.add : ''}</span>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ width: '140px', paddingLeft: '30px' }}>TOTAL</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{subtotal.toLocaleString('fr-FR')} F</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ width: '140px', paddingLeft: '30px' }}>REMISE</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}></span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ width: '140px', paddingLeft: '30px' }}>TOTAL GENERAL</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{subtotal.toLocaleString('fr-FR')} F</span>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #00a3e0', paddingBottom: '20px' }}>
+              <span style={{ width: '140px', paddingLeft: '30px' }}>AVANCE</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{(optic.avance || 0).toLocaleString('fr-FR')} F</span>
+              <span style={{ width: '80px', paddingLeft: '20px' }}>RESTE</span>
+              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{(optic.reste || 0).toLocaleString('fr-FR')} F</span>
+            </div>
+          </div>
+          
+          <div style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.4' }}>
+            <p style={{ margin: '0' }}>RCCM : {companySettings?.rccm || '...................'} - NINEA : {companySettings?.ninea || '...................'}</p>
+            <p style={{ margin: '0' }}>Adresse : {companySettings?.address || '...................'}</p>
+            <p style={{ margin: '0' }}>Tél : {companySettings?.phone || '...................'} - Email : {companySettings?.email || '...................'}</p>
+            {companySettings?.slogan && <p style={{ margin: '5px 0 0 0', fontStyle: 'italic' }}>« {companySettings.slogan} »</p>}
+          </div>
+          
+        </div>
+      </div>
+    );
+  }
 
   if (isCreating) {
     return (
@@ -177,6 +322,56 @@ export const Facturation: React.FC = () => {
             </div>
           </Card>
 
+          {commerceType === 'Optique / Lunetterie' && (
+            <Card>
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', fontWeight: 600 }}>Informations Médicales (Optique)</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '8px' }}>
+                    <input type="checkbox" checked={opticData.monture} onChange={(e) => setOpticData({...opticData, monture: e.target.checked})} style={{ width: '16px', height: '16px' }} />
+                    Monture
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={opticData.verre} onChange={(e) => setOpticData({...opticData, verre: e.target.checked})} style={{ width: '16px', height: '16px' }} />
+                    Verre
+                  </label>
+                </div>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={!!opticData.add} onChange={(e) => setOpticData({...opticData, add: e.target.checked ? 'Oui' : ''})} style={{ width: '16px', height: '16px' }} />
+                    Progressif ADD
+                  </label>
+                  {!!opticData.add && (
+                    <input type="text" className="status-select" style={{ marginTop: '8px', width: '100%' }} placeholder="Valeur ADD" value={opticData.add === 'Oui' ? '' : opticData.add} onChange={(e) => setOpticData({...opticData, add: e.target.value})} />
+                  )}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '8px' }}>OD (Œil Droit)</label>
+                  <input type="text" className="status-select" style={{ width: '100%' }} value={opticData.od} onChange={(e) => setOpticData({...opticData, od: e.target.value})} placeholder="Ex: -1.00 (-0.50) 180°" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '8px' }}>OG (Œil Gauche)</label>
+                  <input type="text" className="status-select" style={{ width: '100%' }} value={opticData.og} onChange={(e) => setOpticData({...opticData, og: e.target.value})} placeholder="Ex: -1.25 (-0.75) 175°" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '8px' }}>Avance payée</label>
+                  <input type="number" className="status-select" style={{ width: '100%' }} value={opticData.avance || ''} onChange={(e) => {
+                    const avance = parseInt(e.target.value) || 0;
+                    setOpticData({...opticData, avance});
+                  }} placeholder="Montant en FCFA" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '8px' }}>Reste à payer</label>
+                  <input type="text" className="status-select" style={{ width: '100%', backgroundColor: 'var(--color-bg)', fontWeight: 'bold' }} value={`${Math.max(0, totalTTC - (opticData.avance || 0)).toLocaleString('fr-FR')} F`} readOnly />
+                </div>
+              </div>
+            </Card>
+          )}
+
           <div style={{ backgroundColor: 'var(--color-primary-light)', padding: '24px', borderRadius: 'var(--radius-lg)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', color: 'var(--color-text-muted)' }}>
               <span>Montant HT</span>
@@ -199,7 +394,7 @@ export const Facturation: React.FC = () => {
               <span>Total TTC</span>
               <span>{totalTTC.toLocaleString('fr-FR')} F</span>
             </div>
-            <Button variant="primary" onClick={() => setIsCreating(false)} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} icon={<FileText size={18} />}>Créer la facture</Button>
+            <Button variant="primary" onClick={handleCreateInvoice} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} icon={<FileText size={18} />}>Créer la facture</Button>
           </div>
         </div>
       </div>
