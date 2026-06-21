@@ -2,78 +2,159 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { db } from './db/index.js';
-import { products, clients, suppliers, sales, quotes, settings } from './db/schema.js';
-import { eq } from 'drizzle-orm';
+import { products, clients, suppliers, sales, quotes, settings, tenants, users } from './db/schema.js';
+import { eq, and } from 'drizzle-orm';
+import { authenticateToken, requireAdmin } from './middleware/auth.js';
 
 // Charge l'environnement
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 // Middlewares
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Routes de base
+// Route de base
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend Express is running!' });
 });
 
-// Route pour tester la connexion à Neon
-app.get('/api/test-db', async (req, res) => {
+// --- AUTHENTICATION ---
+app.post('/api/auth/register', async (req, res) => {
   try {
-    const allProducts = await db.select().from(products).limit(5);
-    res.json({
-      success: true,
-      message: 'Connexion à Neon réussie !',
-      data: allProducts,
-    });
-  } catch (error: any) {
-    console.error("Erreur de connexion à la base de données:", error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la connexion à Neon. Vérifiez votre DATABASE_URL.',
-      error: error.message
-    });
+    const { email, password, name, commerceType } = req.body;
+    
+    // Check if user exists
+    const existingUsers = await db.select().from(users).where(eq(users.email, email));
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ error: 'Un compte existe déjà avec cet e-mail.' });
+    }
+
+    // Create Tenant
+    const newTenant = await db.insert(tenants).values({
+      name: name + ' (Entreprise)',
+      commerceType: commerceType || 'Commerce',
+      subscription: 'Starter',
+      status: 'Actif',
+    }).returning();
+
+    // Create User
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await db.insert(users).values({
+      tenantId: newTenant[0].id,
+      email,
+      passwordHash: hashedPassword,
+      name,
+      role: 'Admin', // L'utilisateur créateur est Admin de son tenant
+    }).returning();
+
+    res.status(201).json({ success: true, message: 'Inscription réussie.' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-// --- PRODUCTS ---
-app.get('/api/products', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   try {
-    const data = await db.select().from(products);
+    const { email, password } = req.body;
+
+    // Super Admin static check
+    if (email === 'test@bizflow.sn' && password === 'Passer@12345') {
+      const token = jwt.sign({ userId: 0, tenantId: null, role: 'SuperAdmin' }, JWT_SECRET, { expiresIn: '12h' });
+      return res.json({ token, role: 'SuperAdmin', name: 'Super Administrateur' });
+    }
+
+    const userArray = await db.select().from(users).where(eq(users.email, email));
+    if (userArray.length === 0) {
+      return res.status(401).json({ error: 'Identifiants incorrects.' });
+    }
+
+    const user = userArray[0];
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Identifiants incorrects.' });
+    }
+
+    const token = jwt.sign({ userId: user.id, tenantId: user.tenantId, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
+    res.json({ token, role: user.role, tenantId: user.tenantId, name: user.name });
+
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- ADMIN ROUTES ---
+app.get('/api/admin/tenants', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const data = await db.select().from(tenants);
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/products', async (req, res) => {
-  try {
-    const newProduct = await db.insert(products).values(req.body).returning();
-    res.json(newProduct[0]);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/admin/tenants/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const updated = await db.update(products).set(req.body).where(eq(products.id, id)).returning();
+    const { status } = req.body;
+    const updated = await db.update(tenants).set({ status }).where(eq(tenants.id, id)).returning();
     res.json(updated[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/products/:id', async (req, res) => {
+// --- MULTI-TENANT HELPERS ---
+const requireTenant = (req: any, res: any, next: any) => {
+  if (!req.user || !req.user.tenantId) {
+    return res.status(403).json({ error: 'Accès refusé. Entreprise non trouvée.' });
+  }
+  next();
+};
+
+// --- PRODUCTS ---
+app.get('/api/products', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const data = await db.select().from(products).where(eq(products.tenantId, req.user!.tenantId!));
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/products', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const newProduct = await db.insert(products).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
+    res.json(newProduct[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/products/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    await db.delete(products).where(eq(products.id, id));
+    const updated = await db.update(products)
+      .set(req.body)
+      .where(and(eq(products.id, id), eq(products.tenantId, req.user!.tenantId!)))
+      .returning();
+    res.json(updated[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/products/:id', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(products).where(and(eq(products.id, id), eq(products.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -81,38 +162,41 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 
 // --- CLIENTS ---
-app.get('/api/clients', async (req, res) => {
+app.get('/api/clients', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const data = await db.select().from(clients);
+    const data = await db.select().from(clients).where(eq(clients.tenantId, req.user!.tenantId!));
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/clients', async (req, res) => {
+app.post('/api/clients', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const newItem = await db.insert(clients).values(req.body).returning();
+    const newItem = await db.insert(clients).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
     res.json(newItem[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/clients/:id', async (req, res) => {
+app.put('/api/clients/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const updated = await db.update(clients).set(req.body).where(eq(clients.id, id)).returning();
+    const updated = await db.update(clients)
+      .set(req.body)
+      .where(and(eq(clients.id, id), eq(clients.tenantId, req.user!.tenantId!)))
+      .returning();
     res.json(updated[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/clients/:id', async (req, res) => {
+app.delete('/api/clients/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    await db.delete(clients).where(eq(clients.id, id));
+    await db.delete(clients).where(and(eq(clients.id, id), eq(clients.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -120,38 +204,41 @@ app.delete('/api/clients/:id', async (req, res) => {
 });
 
 // --- SUPPLIERS ---
-app.get('/api/suppliers', async (req, res) => {
+app.get('/api/suppliers', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const data = await db.select().from(suppliers);
+    const data = await db.select().from(suppliers).where(eq(suppliers.tenantId, req.user!.tenantId!));
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/suppliers', async (req, res) => {
+app.post('/api/suppliers', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const newItem = await db.insert(suppliers).values(req.body).returning();
+    const newItem = await db.insert(suppliers).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
     res.json(newItem[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/suppliers/:id', async (req, res) => {
+app.put('/api/suppliers/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const updated = await db.update(suppliers).set(req.body).where(eq(suppliers.id, id)).returning();
+    const updated = await db.update(suppliers)
+      .set(req.body)
+      .where(and(eq(suppliers.id, id), eq(suppliers.tenantId, req.user!.tenantId!)))
+      .returning();
     res.json(updated[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/suppliers/:id', async (req, res) => {
+app.delete('/api/suppliers/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    await db.delete(suppliers).where(eq(suppliers.id, id));
+    await db.delete(suppliers).where(and(eq(suppliers.id, id), eq(suppliers.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -159,38 +246,41 @@ app.delete('/api/suppliers/:id', async (req, res) => {
 });
 
 // --- SALES ---
-app.get('/api/sales', async (req, res) => {
+app.get('/api/sales', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const data = await db.select().from(sales);
+    const data = await db.select().from(sales).where(eq(sales.tenantId, req.user!.tenantId!));
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/sales', async (req, res) => {
+app.post('/api/sales', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const newItem = await db.insert(sales).values(req.body).returning();
+    const newItem = await db.insert(sales).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
     res.json(newItem[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/sales/:id', async (req, res) => {
+app.put('/api/sales/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const updated = await db.update(sales).set(req.body).where(eq(sales.id, id)).returning();
+    const updated = await db.update(sales)
+      .set(req.body)
+      .where(and(eq(sales.id, id), eq(sales.tenantId, req.user!.tenantId!)))
+      .returning();
     res.json(updated[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/sales/:id', async (req, res) => {
+app.delete('/api/sales/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    await db.delete(sales).where(eq(sales.id, id));
+    await db.delete(sales).where(and(eq(sales.id, id), eq(sales.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -198,38 +288,41 @@ app.delete('/api/sales/:id', async (req, res) => {
 });
 
 // --- QUOTES ---
-app.get('/api/quotes', async (req, res) => {
+app.get('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const data = await db.select().from(quotes);
+    const data = await db.select().from(quotes).where(eq(quotes.tenantId, req.user!.tenantId!));
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/quotes', async (req, res) => {
+app.post('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const newItem = await db.insert(quotes).values(req.body).returning();
+    const newItem = await db.insert(quotes).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
     res.json(newItem[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/quotes/:id', async (req, res) => {
+app.put('/api/quotes/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const updated = await db.update(quotes).set(req.body).where(eq(quotes.id, id)).returning();
+    const updated = await db.update(quotes)
+      .set(req.body)
+      .where(and(eq(quotes.id, id), eq(quotes.tenantId, req.user!.tenantId!)))
+      .returning();
     res.json(updated[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/quotes/:id', async (req, res) => {
+app.delete('/api/quotes/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    await db.delete(quotes).where(eq(quotes.id, id));
+    await db.delete(quotes).where(and(eq(quotes.id, id), eq(quotes.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -237,25 +330,26 @@ app.delete('/api/quotes/:id', async (req, res) => {
 });
 
 // --- SETTINGS ---
-app.get('/api/settings', async (req, res) => {
+app.get('/api/settings', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const data = await db.select().from(settings);
-    // Usually settings is a singleton, return first element if it exists
+    const tenantId = req.user!.tenantId!;
+    const data = await db.select().from(settings).where(eq(settings.tenantId, tenantId));
     res.json(data[0] || null);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', authenticateToken, requireTenant, async (req, res) => {
   try {
-    // Upsert logic for settings: usually we just update ID 1 or create it if not exists.
-    const allSettings = await db.select().from(settings);
+    const tenantId = req.user!.tenantId!;
+    const allSettings = await db.select().from(settings).where(eq(settings.tenantId, tenantId));
+    
     if (allSettings.length > 0) {
       const updated = await db.update(settings).set(req.body).where(eq(settings.id, allSettings[0].id)).returning();
       res.json(updated[0]);
     } else {
-      const newItem = await db.insert(settings).values(req.body).returning();
+      const newItem = await db.insert(settings).values({ ...req.body, tenantId }).returning();
       res.json(newItem[0]);
     }
   } catch (err: any) {

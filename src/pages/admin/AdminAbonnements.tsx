@@ -2,79 +2,73 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, MoreVertical, CheckCircle, XCircle } from 'lucide-react';
 import './AdminAbonnements.css';
 
+import { adminTenantsService } from '../../services/apiService';
+
 interface TenantSub {
-  id: string;
+  id: number;
   name: string;
-  owner: string;
-  email: string;
-  plan: 'Starter' | 'Pro';
+  ownerName?: string;
+  email?: string;
+  subscription: 'Starter' | 'Pro';
   status: 'Actif' | 'Suspendu';
-  amount: number;
-  nextBilling: string;
+  amount?: number;
+  nextBilling?: string;
 }
 
-const mockSubs: TenantSub[] = [
-  { id: 'T-001', name: 'Sow Électronique', owner: 'Amina Sow', email: 'amina.sow@example.com', plan: 'Starter', status: 'Actif', amount: 0, nextBilling: 'Jamais' },
-  { id: 'T-002', name: 'Bamba Supermarché', owner: 'Cheikh Bamba', email: 'contact@bambasuper.sn', plan: 'Pro', status: 'Actif', amount: 15000, nextBilling: '18/07/2026' },
-  { id: 'T-003', name: 'Ndiaye Pharmacie', owner: 'Fatou Ndiaye', email: 'pharmacie.ndiaye@gmail.com', plan: 'Pro', status: 'Actif', amount: 15000, nextBilling: '22/07/2026' },
-  { id: 'T-004', name: 'Kante Quincaillerie', owner: 'Moussa Kante', email: 'kante.quin@hotmail.com', plan: 'Starter', status: 'Suspendu', amount: 0, nextBilling: 'Jamais' },
-];
-
 export const AdminAbonnements: React.FC = () => {
-  const [subs, setSubs] = useState<TenantSub[]>(mockSubs);
+  const [subs, setSubs] = useState<TenantSub[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('Tous');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
+  const [activeActionMenu, setActiveActionMenu] = useState<number | null>(null);
   const [selectedTenantDetails, setSelectedTenantDetails] = useState<TenantSub | null>(null);
 
   useEffect(() => {
-    // Check local storage for current user to inject them as a real line
-    const userCommerceType = localStorage.getItem('userCommerceType') || 'Commerce';
-    const userPlan = localStorage.getItem('pos_subscription') === 'Pro' ? 'Pro' : 'Starter';
-    
-    setSubs([
-      {
-        id: 'T-CURRENT',
-        name: `Mon ${userCommerceType}`,
-        owner: 'Boubacar Diallo (Moi)',
-        email: 'boudiallo20@gmail.com',
-        plan: userPlan,
-        status: 'Actif',
-        amount: userPlan === 'Pro' ? 15000 : 0,
-        nextBilling: userPlan === 'Pro' ? '17/07/2026' : 'Jamais'
-      },
-      ...mockSubs
-    ]);
+    loadTenants();
   }, []);
 
-  const handleToggleStatus = (id: string) => {
-    setSubs(subs.map(sub => {
-      if (sub.id === id) {
-        return {
-          ...sub,
-          status: sub.status === 'Actif' ? 'Suspendu' : 'Actif'
-        };
-      }
-      return sub;
-    }));
+  const loadTenants = async () => {
+    try {
+      const data = await adminTenantsService.getAll();
+      setSubs(data.map((t: any) => ({
+        ...t,
+        amount: t.subscription === 'Pro' ? 15000 : 0,
+        nextBilling: t.subscription === 'Pro' ? 'Mensuel' : 'Jamais',
+        ownerName: 'Propriétaire', // Ideally we'd join with the users table or settings
+        email: 'contact@' + t.name.replace(/\s+/g, '').toLowerCase() + '.com'
+      })));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleToggleStatus = async (id: number) => {
+    const sub = subs.find(s => s.id === id);
+    if (!sub) return;
+    
+    try {
+      const newStatus = sub.status === 'Actif' ? 'Suspendu' : 'Actif';
+      await adminTenantsService.updateStatus(id, newStatus);
+      await loadTenants();
+    } catch (e) {
+      console.error(e);
+    }
     setActiveActionMenu(null);
   };
 
   const filteredSubs = subs.filter(sub => {
-    const matchesSearch = sub.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          sub.owner.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = sub.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     let matchesFilter = true;
-    if (activeFilter === 'Pro') matchesFilter = sub.plan === 'Pro';
-    if (activeFilter === 'Starter') matchesFilter = sub.plan === 'Starter';
+    if (activeFilter === 'Pro') matchesFilter = sub.subscription === 'Pro';
+    if (activeFilter === 'Starter') matchesFilter = sub.subscription === 'Starter';
     if (activeFilter === 'Actifs') matchesFilter = sub.status === 'Actif';
     if (activeFilter === 'Suspendus') matchesFilter = sub.status === 'Suspendu';
 
     return matchesSearch && matchesFilter;
   });
 
-  const totalMRR = subs.filter(s => s.status === 'Actif').reduce((sum, s) => sum + s.amount, 0);
+  const totalMRR = subs.filter(s => s.status === 'Actif').reduce((sum, s) => sum + (s.amount || 0), 0);
 
   return (
     <div className="admin-abonnements-container">
@@ -139,11 +133,11 @@ export const AdminAbonnements: React.FC = () => {
                   <td>
                     <div className="tenant-info">
                       <span className="tenant-name">{sub.name}</span>
-                      <span className="tenant-owner">{sub.owner}</span>
+                      <span className="tenant-owner">{sub.ownerName}</span>
                     </div>
                   </td>
                   <td>
-                    <span className={`plan-badge ${sub.plan.toLowerCase()}`}>{sub.plan}</span>
+                    <span className={`plan-badge ${sub.subscription.toLowerCase()}`}>{sub.subscription}</span>
                   </td>
                   <td>
                     <span className={`status-badge ${sub.status.toLowerCase()}`}>
@@ -151,7 +145,7 @@ export const AdminAbonnements: React.FC = () => {
                       {sub.status}
                     </span>
                   </td>
-                  <td className="mrr-cell">{sub.amount > 0 ? `${sub.amount.toLocaleString('fr-FR')} F` : '-'}</td>
+                  <td className="mrr-cell">{(sub.amount && sub.amount > 0) ? `${sub.amount.toLocaleString('fr-FR')} F` : '-'}</td>
                   <td className="billing-cell">{sub.nextBilling}</td>
                   <td style={{ position: 'relative' }}>
                     <button 
@@ -209,7 +203,7 @@ export const AdminAbonnements: React.FC = () => {
                 </div>
                 <div>
                   <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Plan Actuel</span>
-                  <span className={`plan-badge ${selectedTenantDetails.plan.toLowerCase()}`} style={{ display: 'inline-block' }}>{selectedTenantDetails.plan}</span>
+                  <span className={`plan-badge ${selectedTenantDetails.subscription.toLowerCase()}`} style={{ display: 'inline-block' }}>{selectedTenantDetails.subscription}</span>
                 </div>
                 <div>
                   <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Statut</span>
@@ -224,7 +218,7 @@ export const AdminAbonnements: React.FC = () => {
                 <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--color-text)' }}>Informations de facturation</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <span style={{ color: 'var(--color-text-muted)' }}>Montant MRR</span>
-                  <span style={{ fontWeight: 600 }}>{selectedTenantDetails.amount > 0 ? `${selectedTenantDetails.amount.toLocaleString('fr-FR')} F / mois` : 'Gratuit'}</span>
+                  <span style={{ fontWeight: 600 }}>{(selectedTenantDetails.amount && selectedTenantDetails.amount > 0) ? `${selectedTenantDetails.amount.toLocaleString('fr-FR')} F / mois` : 'Gratuit'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: 'var(--color-text-muted)' }}>Prochaine facture</span>

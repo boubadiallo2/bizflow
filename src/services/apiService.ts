@@ -1,14 +1,41 @@
 const API_URL = '/api';
 
+// Helper pour récupérer le token depuis le localStorage
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('bizflow_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
+const handleResponse = async (res: Response) => {
+  if (res.status === 401 || res.status === 403) {
+    // Token expiré ou invalide
+    localStorage.removeItem('bizflow_token');
+    localStorage.removeItem('bizflow_role');
+    localStorage.removeItem('bizflow_tenantId');
+    localStorage.removeItem('bizflow_name');
+    window.location.href = '/login';
+    throw new Error('Session expirée. Veuillez vous reconnecter.');
+  }
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || `Erreur serveur: ${res.status}`);
+  }
+  return res.json();
+};
+
 // ==========================================
 // Service CRUD générique pour API REST
 // ==========================================
 
 export async function getAll<T>(endpoint: string): Promise<(T & { id: string })[]> {
   try {
-    const res = await fetch(`${API_URL}/${endpoint}`);
-    if (!res.ok) throw new Error(`Erreur lors de la lecture de ${endpoint}`);
-    return await res.json();
+    const res = await fetch(`${API_URL}/${endpoint}`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
   } catch (error) {
     console.error(`Erreur GET /api/${endpoint}:`, error);
     return [];
@@ -17,11 +44,11 @@ export async function getAll<T>(endpoint: string): Promise<(T & { id: string })[
 
 export async function getById<T>(endpoint: string, id: string | number): Promise<(T & { id: string }) | null> {
   try {
-    // Dans Express, l'endpoint settings n'a pas besoin de /:id
     const url = endpoint === 'settings' ? `${API_URL}/${endpoint}` : `${API_URL}/${endpoint}/${id}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Erreur lors de la lecture de ${endpoint}/${id}`);
-    const data = await res.json();
+    const res = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+    const data = await handleResponse(res);
     return data ? data : null;
   } catch (error) {
     console.error(`Erreur GET /api/${endpoint}/${id}:`, error);
@@ -33,12 +60,11 @@ export async function add<T>(endpoint: string, data: T): Promise<string> {
   try {
     const res = await fetch(`${API_URL}/${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Erreur lors de l'ajout dans ${endpoint}`);
-    const newItem = await res.json();
-    return newItem.id.toString();
+    const newItem = await handleResponse(res);
+    return newItem.id ? newItem.id.toString() : '';
   } catch (error) {
     console.error(`Erreur POST /api/${endpoint}:`, error);
     throw error;
@@ -48,21 +74,20 @@ export async function add<T>(endpoint: string, data: T): Promise<string> {
 export async function update(endpoint: string, id: string | number, data: any): Promise<void> {
   try {
     const url = endpoint === 'settings' ? `${API_URL}/${endpoint}` : `${API_URL}/${endpoint}/${id}`;
-    const method = endpoint === 'settings' ? 'POST' : 'PUT'; // Pour les settings on utilise POST (upsert)
+    const method = endpoint === 'settings' ? 'POST' : 'PUT';
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Erreur lors de la mise à jour de ${endpoint}/${id}`);
+    await handleResponse(res);
   } catch (error) {
-    console.error(`Erreur PUT /api/${endpoint}/${id}:`, error);
+    console.error(`Erreur ${endpoint === 'settings' ? 'POST' : 'PUT'} /api/${endpoint}/${id}:`, error);
     throw error;
   }
 }
 
 export async function set<T>(endpoint: string, id: string | number, data: T): Promise<void> {
-  // Pour le backend SQL, `set` est équivalent à `update` dans la plupart des cas, ou à POST pour settings
   await update(endpoint, id, data);
 }
 
@@ -70,8 +95,9 @@ export async function remove(endpoint: string, id: string | number): Promise<voi
   try {
     const res = await fetch(`${API_URL}/${endpoint}/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     });
-    if (!res.ok) throw new Error(`Erreur lors de la suppression de ${endpoint}/${id}`);
+    await handleResponse(res);
   } catch (error) {
     console.error(`Erreur DELETE /api/${endpoint}/${id}:`, error);
     throw error;
@@ -123,5 +149,33 @@ export const quotesService = {
 
 export const settingsService = {
   get: () => getById<any>('settings', 'company'),
-  save: (data: any) => add('settings', data), // on utilise POST pour upsert les settings
+  save: (data: any) => add('settings', data), 
+};
+
+export const adminTenantsService = {
+  getAll: () => getAll<any>('admin/tenants'),
+  updateStatus: (id: string | number, status: string) => fetch(`${API_URL}/admin/tenants/${id}/status`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ status })
+  }).then(handleResponse),
+};
+
+export const authService = {
+  login: async (credentials: any) => {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+    return handleResponse(res);
+  },
+  register: async (userData: any) => {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    return handleResponse(res);
+  }
 };

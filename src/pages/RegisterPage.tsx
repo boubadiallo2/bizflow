@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Store, ArrowLeft } from 'lucide-react';
-import { settingsService } from '../services/apiService';
+import { authService } from '../services/apiService';
 import './RegisterPage.css';
 
 export const RegisterPage: React.FC = () => {
@@ -14,6 +14,7 @@ export const RegisterPage: React.FC = () => {
     selectedProducts: [] as string[]
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const commerceOptions: Record<string, string[]> = {
@@ -67,19 +68,20 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    setLoading(true);
     try {
-      // Save settings
-      await settingsService.save({
-        ownerName: formData.name,
-        name: formData.company,
+      await authService.register({
+        name: formData.name,
+        company: formData.company,
         commerceType: formData.commerceType,
-        selectedProducts: formData.selectedProducts,
         email: formData.email,
+        password: formData.password
       });
-      // Registration successful
-      navigate('/app');
+      navigate('/login');
     } catch (err: any) {
-      setError("Erreur lors de l'inscription. Vérifiez la connexion à la base de données (DATABASE_URL sur Vercel).");
+      setError(err.message || "Erreur lors de l'inscription.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -184,8 +186,8 @@ export const RegisterPage: React.FC = () => {
               required
             />
           </div>
-          <button type="submit" className="register-btn">
-            S'inscrire
+          <button type="submit" className="register-btn" disabled={loading}>
+            {loading ? 'Inscription en cours...' : 'S\'inscrire'}
           </button>
         </form>
 

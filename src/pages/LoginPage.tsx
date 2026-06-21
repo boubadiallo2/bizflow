@@ -1,30 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Store, ArrowLeft } from 'lucide-react';
+import { authService } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
 import './LoginPage.css';
 
 export const LoginPage: React.FC = () => {
-  // Pré-remplir avec les identifiants par défaut demandés
-  const [email, setEmail] = useState('boudiallo20@gmail.com');
-  const [password, setPassword] = useState('demo123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     
-    // Super Admin Authentication
-    if (email === 'test@bizflow.sn' && password === 'Passer@12345') {
-      // Dans une vraie app, on stockerait un token admin
-      navigate('/admin/dashboard');
-      return;
-    }
-
-    // Validation du compte par défaut
-    if (email === 'boudiallo20@gmail.com') {
-      navigate('/app');
-    } else {
-      setError('Adresse e-mail ou mot de passe incorrect.');
+    try {
+      const data = await authService.login({ email, password });
+      login(data.token, data.role, data.tenantId, data.name);
+      
+      if (data.role === 'SuperAdmin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/app');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Identifiants incorrects.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,8 +77,8 @@ export const LoginPage: React.FC = () => {
               required
             />
           </div>
-          <button type="submit" className="login-btn">
-            Se connecter
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Connexion en cours...' : 'Se connecter'}
           </button>
         </form>
       </div>

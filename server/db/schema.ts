@@ -1,7 +1,27 @@
 import { pgTable, serial, text, timestamp, varchar, integer, boolean, jsonb, decimal } from 'drizzle-orm/pg-core';
 
+export const tenants = pgTable('tenants', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  commerceType: varchar('commerce_type', { length: 100 }),
+  subscription: varchar('subscription', { length: 50 }).default('Starter'),
+  status: varchar('status', { length: 50 }).default('Active'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).default('Admin'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const products = pgTable('products', {
   id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   category: varchar('category', { length: 100 }),
   unit: varchar('unit', { length: 50 }),
@@ -16,6 +36,7 @@ export const products = pgTable('products', {
 
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   phone: varchar('phone', { length: 50 }),
   email: varchar('email', { length: 255 }),
@@ -27,16 +48,18 @@ export const clients = pgTable('clients', {
 
 export const suppliers = pgTable('suppliers', {
   id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   phone: varchar('phone', { length: 50 }),
   location: text('location'),
-  products: text('products'), // Description of what they supply
+  products: text('products'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
 export const sales = pgTable('sales', {
   id: serial('id').primaryKey(),
-  ticketId: varchar('ticket_id', { length: 100 }).notNull().unique(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
+  ticketId: varchar('ticket_id', { length: 100 }).notNull(),
   date: timestamp('date').defaultNow(),
   amount: integer('amount').notNull(),
   tendered: integer('tendered'),
@@ -44,27 +67,29 @@ export const sales = pgTable('sales', {
   itemsCount: integer('items_count'),
   method: varchar('method', { length: 50 }),
   status: varchar('status', { length: 50 }),
-  cartItems: jsonb('cart_items'), // To keep it simple, we store the cart array as JSON
+  cartItems: jsonb('cart_items'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
 export const quotes = pgTable('quotes', {
   id: serial('id').primaryKey(),
-  quoteNumber: varchar('quote_number', { length: 100 }).notNull().unique(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
+  quoteNumber: varchar('quote_number', { length: 100 }).notNull(),
   client: varchar('client', { length: 255 }),
   date: timestamp('date').defaultNow(),
   totalHT: integer('total_ht'),
   tva: integer('tva'),
   totalTTC: integer('total_ttc'),
   status: varchar('status', { length: 50 }),
-  lines: jsonb('lines'), // JSON array of quote items
+  lines: jsonb('lines'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
 export const settings = pgTable('settings', {
   id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
   ownerName: varchar('owner_name', { length: 255 }),
-  name: varchar('name', { length: 255 }), // Company name
+  name: varchar('name', { length: 255 }),
   commerceType: varchar('commerce_type', { length: 100 }),
   selectedProducts: jsonb('selected_products'),
   email: varchar('email', { length: 255 }),
@@ -73,6 +98,5 @@ export const settings = pgTable('settings', {
   country: varchar('country', { length: 10 }),
   city: varchar('city', { length: 100 }),
   logo: text('logo'),
-  subscription: varchar('subscription', { length: 50 }).default('Free'),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
