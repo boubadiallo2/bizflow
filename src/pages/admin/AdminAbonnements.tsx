@@ -184,7 +184,7 @@ export const AdminAbonnements: React.FC = () => {
             <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--color-border)', paddingBottom: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0, color: 'var(--color-text)' }}>{selectedTenantDetails.name}</h3>
-                <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{selectedTenantDetails.owner}</p>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{selectedTenantDetails.ownerName}</p>
               </div>
               <button onClick={() => setSelectedTenantDetails(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px' }}>
                 <XCircle size={24} />
