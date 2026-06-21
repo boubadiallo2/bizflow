@@ -38,6 +38,7 @@ export const Facturation: React.FC = () => {
   const [commerceType, setCommerceType] = useState('');
   const [companySettings, setCompanySettings] = useState<any>(null);
   const [viewingInvoice, setViewingInvoice] = useState<any>(null);
+  const [autoAction, setAutoAction] = useState<'print' | 'download' | null>(null);
   const [opticData, setOpticData] = useState({
     od: '',
     og: '',
@@ -134,6 +135,29 @@ export const Facturation: React.FC = () => {
       console.error("Erreur création facture", e);
     }
   };
+
+  useEffect(() => {
+    if (viewingInvoice && autoAction) {
+      if (autoAction === 'print') {
+        setTimeout(() => window.print(), 500);
+      } else if (autoAction === 'download') {
+        setTimeout(() => {
+          const element = document.getElementById('invoice-pdf-content');
+          if (element) {
+            const opt = {
+              margin:       0,
+              filename:     `Facture_${viewingInvoice.invoiceNumber || 'Optique'}.pdf`,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true },
+              jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+          }
+        }, 500);
+      }
+      setAutoAction(null);
+    }
+  }, [viewingInvoice, autoAction]);
 
   if (viewingInvoice && commerceType === 'Optique / Lunetterie') {
     const optic = viewingInvoice.opticData || {};
@@ -533,7 +557,10 @@ export const Facturation: React.FC = () => {
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         {commerceType === 'Optique / Lunetterie' ? (
-                          <Button variant="secondary" onClick={() => setViewingInvoice(invoice)} icon={<FileText size={16} />}>Aperçu</Button>
+                          <>
+                            <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('print'); }} icon={<Printer size={16} />}>Imprimer</Button>
+                            <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('download'); }} icon={<Download size={16} />}>Télécharger</Button>
+                          </>
                         ) : (
                           <Button variant="secondary" onClick={() => alert("Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
                         )}
