@@ -17,14 +17,6 @@ interface ProductItem {
   imageUrl?: string;
 }
 
-const defaultInventoryData = [
-  { name: 'T-shirt basique en coton', category: 'textile', unit: 'pièce', stock: 50, minStock: 5, achat: '2 000 F', vente: '3 500 F', priceValue: 3500 },
-  { name: 'Jean slim pour homme', category: 'textile', unit: 'pièce', stock: 3, minStock: 3, achat: '9 000 F', vente: '15 000 F', priceValue: 15000 },
-  { name: "Robe d'été imprimée", category: 'textile', unit: 'pièce', stock: 2, minStock: 4, achat: '7 000 F', vente: '12 000 F', priceValue: 12000 },
-  { name: 'Chemisette en lin', category: 'textile', unit: 'pièce', stock: 40, minStock: 5, achat: '5 000 F', vente: '8 000 F', priceValue: 8000 },
-  { name: 'Short en jeans', category: 'textile', unit: 'pièce', stock: 25, minStock: 3, achat: '6 000 F', vente: '10 000 F', priceValue: 10000 },
-  { name: 'Veste en cuir synthétique', category: 'textile', unit: 'pièce', stock: 1, minStock: 2, achat: '15 000 F', vente: '25 000 F', priceValue: 25000 },
-];
 
 export const Inventaire: React.FC = () => {
   const [activeTab, setActiveTab] = useState('produits');
@@ -48,16 +40,7 @@ export const Inventaire: React.FC = () => {
     const loadProducts = async () => {
       try {
         const data = await productsService.getAll();
-        if (data.length === 0) {
-          // Seed default data on first use
-          for (const item of defaultInventoryData) {
-            await productsService.add(item);
-          }
-          const seeded = await productsService.getAll();
-          setProducts(seeded as ProductItem[]);
-        } else {
-          setProducts(data as ProductItem[]);
-        }
+        setProducts(data as ProductItem[]);
       } catch (error) {
         console.error('Erreur chargement produits:', error);
       } finally {

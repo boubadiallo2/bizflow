@@ -14,12 +14,6 @@ interface Product {
   imageUrl?: string;
 }
 
-const defaultProducts: Product[] = [
-  { id: 1, name: 'Article standard 1', price: '3 500 F', priceValue: 3500, stock: 50 },
-  { id: 2, name: 'Article standard 2', price: '15 000 F', priceValue: 15000, stock: 30 },
-  { id: 3, name: "Article standard 3", price: '12 000 F', priceValue: 12000, stock: 20 },
-  { id: 4, name: 'Article standard 4', price: '8 000 F', priceValue: 8000, stock: 40 },
-];
 
 const productDatabase: Record<string, Product[]> = {
   // Alimentation
@@ -106,12 +100,14 @@ export const PointDeVente: React.FC = () => {
       }
       
       if (productsToAdd.length === 0) {
-        defaultProducts.forEach(p => productsToAdd.push({ ...p, categoryName: 'Général' }));
+        // Fallback to random products if no specific category matches
+        productDatabase['Plats chauds'].forEach(p => productsToAdd.push({ ...p, categoryName: 'Restauration' }));
       }
       
       for (const prod of productsToAdd) {
-        const encodedName = encodeURIComponent(prod.name);
-        const imageUrl = `https://ui-avatars.com/api/?name=${encodedName}&background=random&color=fff&size=400&font-size=0.33`;
+        const keyword1 = encodeURIComponent(prod.categoryName.split(' ')[0].toLowerCase());
+        const keyword2 = encodeURIComponent(prod.name.split(' ')[0].toLowerCase());
+        const imageUrl = `https://loremflickr.com/400/400/${keyword1},${keyword2}/all?random=${prod.id}`;
         
         await productsService.add({
           name: prod.name,
@@ -161,11 +157,11 @@ export const PointDeVente: React.FC = () => {
             imageUrl: p.imageUrl
           })));
         } else {
-          setProducts(defaultProducts);
+          setProducts([]);
         }
       } catch (e) {
         console.error('Erreur chargement produits POS:', e);
-        setProducts(defaultProducts);
+        setProducts([]);
       }
     };
     loadProducts();
