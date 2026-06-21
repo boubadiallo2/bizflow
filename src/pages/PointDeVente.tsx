@@ -239,13 +239,13 @@ export const PointDeVente: React.FC = () => {
   let discountAmount = 0;
   const numDiscount = Number(discountValue) || 0;
   if (discountType === 'fcfa') {
-    discountAmount = numDiscount;
+    discountAmount = Math.round(numDiscount);
   } else if (discountType === 'percent') {
-    discountAmount = (subtotal * numDiscount) / 100;
+    discountAmount = Math.round((subtotal * numDiscount) / 100);
   }
   
   const subtotalAfterDiscount = Math.max(0, subtotal - discountAmount);
-  const tvaAmount = applyTVA ? subtotalAfterDiscount * 0.18 : 0;
+  const tvaAmount = applyTVA ? Math.round(subtotalAfterDiscount * 0.18) : 0;
   const total = subtotalAfterDiscount + tvaAmount;
 
   const handleCheckout = () => {
@@ -259,13 +259,10 @@ export const PointDeVente: React.FC = () => {
     // Calculate change
     const change = Math.max(0, amountTendered - total);
     
-    // Save sale to Firebase
-    const saleData = {
+    // Save sale to DB (only fields in schema)
+    const dbSaleData = {
       ticketId: `TICK-${Date.now().toString().slice(-6)}`,
       date: new Date().toISOString(),
-      subtotal: subtotal,
-      discount: discountAmount,
-      tva: tvaAmount,
       amount: total,
       tendered: amountTendered,
       change: change,
@@ -279,14 +276,22 @@ export const PointDeVente: React.FC = () => {
         priceValue: item.product.priceValue
       }))
     };
+
+    // Full data for receipt
+    const receiptFullData = {
+      ...dbSaleData,
+      subtotal: subtotal,
+      discount: discountAmount,
+      tva: tvaAmount,
+    };
     
     try {
-      await salesService.add(saleData);
+      await salesService.add(dbSaleData);
     } catch (error) {
       console.error('Erreur sauvegarde vente:', error);
     }
 
-    setReceiptData({ ...saleData, id: saleData.ticketId });
+    setReceiptData({ ...receiptFullData, id: dbSaleData.ticketId });
     setIsPaymentModalOpen(false);
     setIsReceiptModalOpen(true);
   };
