@@ -29,7 +29,7 @@ app.get('/api/health', (req, res) => {
 // --- AUTHENTICATION ---
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, name, company, commerceType, phone, city, address, country } = req.body;
+    const { email, password, name, company, commerceType, phone, city, address, country, selectedProducts } = req.body;
     
     // Check if user exists
     const existingUsers = await db.select().from(users).where(eq(users.email, email));
@@ -61,6 +61,7 @@ app.post('/api/auth/register', async (req, res) => {
       name: company || name + ' (Entreprise)',
       ownerName: name,
       commerceType: commerceType || 'Autre',
+      selectedProducts: selectedProducts || [],
       email: email,
       phone: phone || '',
       city: city || '',

@@ -83,7 +83,8 @@ export const RegisterPage: React.FC = () => {
         phone: formData.phone,
         city: formData.city,
         address: formData.address,
-        country: formData.country
+        country: formData.country,
+        selectedProducts: formData.selectedProducts
       });
       navigate('/login');
     } catch (err: any) {
