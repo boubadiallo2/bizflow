@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { LogOut, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Header.css';
 
 export const Header: React.FC = () => {
-  const navigate = useNavigate();
   const [showErrorModal, setShowErrorModal] = useState(false);
   const { name, logout } = useAuth();
 
