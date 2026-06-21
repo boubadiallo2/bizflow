@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar, X } from 'lucide-react';
+import { Search, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar, X, Trash2 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { salesService } from '../services/apiService';
+import { salesService, clientsService, productsService } from '../services/apiService';
 import './Ventes.css';
 
 interface Sale {
@@ -24,6 +24,14 @@ export const Ventes: React.FC = () => {
   const [, setLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
+  // States for creating a new order
+  const [clients, setClients] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [orderItems, setOrderItems] = useState<{ id: string, productId: string, quantity: number }[]>([{ id: Date.now().toString(), productId: '', quantity: 1 }]);
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     const loadSales = async () => {
       try {
@@ -38,6 +46,27 @@ export const Ventes: React.FC = () => {
     loadSales();
   }, []);
 
+  useEffect(() => {
+    if (isCreating) {
+      const loadFormData = async () => {
+        try {
+          const [clientsData, productsData] = await Promise.all([
+            clientsService.getAll(),
+            productsService.getAll()
+          ]);
+          setClients(clientsData);
+          setProducts(productsData.map((p: any) => ({
+            ...p,
+            priceValue: p.priceValue || parseInt((p.vente || '0').replace(/\D/g, '')) || 0
+          })));
+        } catch (error) {
+          console.error('Erreur chargement données formulaire:', error);
+        }
+      };
+      loadFormData();
+    }
+  }, [isCreating]);
+
   const filteredSales = useMemo(() => {
     let result = [...sales];
     if (searchQuery) {
@@ -47,6 +76,88 @@ export const Ventes: React.FC = () => {
     // Sort by date descending (most recent first)
     return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [sales, searchQuery]);
+
+  const { subtotal, tva, total } = useMemo(() => {
+    let sub = 0;
+    orderItems.forEach(item => {
+      if (item.productId) {
+        const product = products.find(p => p.id.toString() === item.productId);
+        if (product) {
+          sub += product.priceValue * item.quantity;
+        }
+      }
+    });
+    const tvaAmount = Math.round(sub * 0.18);
+    return { subtotal: sub, tva: tvaAmount, total: sub + tvaAmount };
+  }, [orderItems, products]);
+
+  const handleAddOrderItem = () => {
+    setOrderItems([...orderItems, { id: Date.now().toString(), productId: '', quantity: 1 }]);
+  };
+
+  const handleRemoveOrderItem = (id: string) => {
+    if (orderItems.length > 1) {
+      setOrderItems(orderItems.filter(item => item.id !== id));
+    }
+  };
+
+  const handleOrderItemChange = (id: string, field: 'productId' | 'quantity', value: any) => {
+    setOrderItems(orderItems.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    }));
+  };
+
+  const handleCreateOrder = async () => {
+    const validItems = orderItems.filter(item => item.productId && item.quantity > 0);
+    if (validItems.length === 0) {
+      alert("Veuillez ajouter au moins un produit valide.");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const cartItems = validItems.map(item => {
+        const product = products.find(p => p.id.toString() === item.productId);
+        return {
+          productId: parseInt(item.productId),
+          productName: product?.name || 'Produit',
+          quantity: item.quantity,
+          priceValue: product?.priceValue || 0
+        };
+      });
+
+      const dbSaleData = {
+        ticketId: `CMD-${Date.now().toString().slice(-6)}`,
+        date: new Date().toISOString(),
+        amount: total,
+        tendered: total,
+        change: 0,
+        itemsCount: validItems.reduce((sum, item) => sum + item.quantity, 0),
+        method: 'A crédit',
+        status: 'Complété',
+        cartItems: cartItems,
+        notes: notes
+      };
+
+      await salesService.add(dbSaleData);
+      
+      const data = await salesService.getAll();
+      setSales(data as Sale[]);
+      
+      setIsCreating(false);
+      setOrderItems([{ id: Date.now().toString(), productId: '', quantity: 1 }]);
+      setSelectedClientId('');
+      setNotes('');
+    } catch (error) {
+      console.error("Erreur création commande:", error);
+      alert("Erreur lors de la création de la commande.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isCreating) {
     return (
@@ -64,57 +175,112 @@ export const Ventes: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px' }}>
           <Card>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', fontWeight: 600 }}>Client</h3>
-            <select className="filter-select" style={{ width: '100%' }}>
-              <option value="">Sélectionnez un client</option>
-              <option value="1">Entreprise ABC</option>
+            <select 
+              className="filter-select" 
+              style={{ width: '100%' }}
+              value={selectedClientId}
+              onChange={(e) => setSelectedClientId(e.target.value)}
+            >
+              <option value="">Sélectionnez un client (Optionnel)</option>
+              {clients.map(client => (
+                <option key={client.id} value={client.id}>{client.name}</option>
+              ))}
             </select>
           </Card>
 
           <Card>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Produits</h3>
-              <button style={{ padding: '6px 12px', fontSize: '0.875rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', gap: '4px', alignItems: 'center', cursor: 'pointer', fontWeight: 500 }}>
+              <button 
+                onClick={handleAddOrderItem}
+                style={{ padding: '6px 12px', fontSize: '0.875rem', background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '6px', display: 'flex', gap: '4px', alignItems: 'center', cursor: 'pointer', fontWeight: 500 }}
+              >
                 <Plus size={16} /> Ajouter
               </button>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '16px', alignItems: 'center' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--color-text-muted)' }}>Produit</label>
-                <select className="filter-select" style={{ width: '100%' }}>
-                  <option value="">Choisir un produit</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--color-text-muted)' }}>Quantité</label>
-                <input type="number" defaultValue="1" min="1" style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontSize: '0.95rem' }} />
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--color-text-muted)' }}>Sous-total</label>
-                <div style={{ fontWeight: 600, padding: '10px 0' }}>0 F</div>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {orderItems.map((item, index) => {
+                const product = products.find(p => p.id.toString() === item.productId);
+                const itemSubtotal = product ? product.priceValue * item.quantity : 0;
+                
+                return (
+                  <div key={item.id} style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr auto', gap: '16px', alignItems: 'center', paddingBottom: '16px', borderBottom: index < orderItems.length - 1 ? '1px dashed var(--color-border)' : 'none' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--color-text-muted)' }}>Produit</label>
+                      <select 
+                        className="filter-select" 
+                        style={{ width: '100%' }}
+                        value={item.productId}
+                        onChange={(e) => handleOrderItemChange(item.id, 'productId', e.target.value)}
+                      >
+                        <option value="">Choisir un produit</option>
+                        {products.map(p => (
+                          <option key={p.id} value={p.id}>{p.name} - {p.priceValue.toLocaleString('fr-FR')} F</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--color-text-muted)' }}>Quantité</label>
+                      <input 
+                        type="number" 
+                        value={item.quantity} 
+                        onChange={(e) => handleOrderItemChange(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                        min="1" 
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontSize: '0.95rem' }} 
+                      />
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--color-text-muted)' }}>Sous-total</label>
+                      <div style={{ fontWeight: 600, padding: '10px 0' }}>{itemSubtotal.toLocaleString('fr-FR')} F</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '10px' }}>
+                      <button 
+                        onClick={() => handleRemoveOrderItem(item.id)}
+                        style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: orderItems.length > 1 ? 'pointer' : 'not-allowed', opacity: orderItems.length > 1 ? 1 : 0.5 }}
+                        disabled={orderItems.length <= 1}
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
 
           <Card>
             <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', fontWeight: 600 }}>Notes</h3>
-            <textarea placeholder="Notes internes..." style={{ width: '100%', minHeight: '100px', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontFamily: 'inherit', resize: 'vertical' }}></textarea>
+            <textarea 
+              placeholder="Notes internes..." 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              style={{ width: '100%', minHeight: '100px', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontFamily: 'inherit', resize: 'vertical' }}
+            ></textarea>
           </Card>
 
           <div style={{ backgroundColor: 'var(--color-primary-light)', padding: '24px', borderRadius: 'var(--radius-lg)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', color: 'var(--color-text-muted)' }}>
               <span>Sous-total HT</span>
-              <span>0 F</span>
+              <span>{subtotal.toLocaleString('fr-FR')} F</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', color: 'var(--color-text-muted)' }}>
               <span>TVA (18%)</span>
-              <span>0 F</span>
+              <span>{tva.toLocaleString('fr-FR')} F</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', fontSize: '1.25rem', fontWeight: 700 }}>
               <span>Total TTC</span>
-              <span>0 F</span>
+              <span>{total.toLocaleString('fr-FR')} F</span>
             </div>
-            <Button variant="primary" onClick={() => setIsCreating(false)} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} icon={<FileText size={18} />}>Créer la commande</Button>
+            <Button 
+              variant="primary" 
+              onClick={handleCreateOrder} 
+              disabled={isSubmitting || orderItems.every(i => !i.productId)}
+              style={{ width: '100%', display: 'flex', justifyContent: 'center' }} 
+              icon={<FileText size={18} />}
+            >
+              {isSubmitting ? 'Création...' : 'Créer la commande'}
+            </Button>
           </div>
         </div>
       </div>
