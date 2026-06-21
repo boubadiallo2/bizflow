@@ -149,7 +149,7 @@ export const Facturation: React.FC = () => {
               filename:     `Facture_${viewingInvoice.invoiceNumber || 'Optique'}.pdf`,
               image:        { type: 'jpeg' as const, quality: 0.98 },
               html2canvas:  { scale: 2, useCORS: true },
-              jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+              jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' as const }
             };
             html2pdf().set(opt).from(element).save();
           }
@@ -177,7 +177,7 @@ export const Facturation: React.FC = () => {
                 filename:     `Facture_${viewingInvoice.invoiceNumber || 'Optique'}.pdf`,
                 image:        { type: 'jpeg' as const, quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' as const } as const
               };
               html2pdf().set(opt).from(element).save();
             }} icon={<Download size={18} />}>Télécharger PDF</Button>
