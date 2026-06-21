@@ -13,7 +13,7 @@ export const Parametres: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
     name: name || '',
-    commerceType: 'restaurant',
+    commerceType: '',
     country: 'sn',
     city: '',
     phone: '',
@@ -217,10 +217,16 @@ export const Parametres: React.FC = () => {
             <div className="form-group">
               <label className="form-label">Type de commerce</label>
               <select name="commerceType" className="form-select" value={companyInfo.commerceType} onChange={handleChange}>
-                <option value="restaurant">Restaurant</option>
-                <option value="retail">Boutique / Détail</option>
-                <option value="services">Services</option>
-                <option value="other">Autre</option>
+                <option value="" disabled>Sélectionnez votre type d'activité</option>
+                <option value="Alimentation / Supermarché">Alimentation / Supermarché</option>
+                <option value="Boutique de vêtements">Boutique de vêtements</option>
+                <option value="Électronique / Informatique">Électronique / Informatique</option>
+                <option value="Pharmacie">Pharmacie</option>
+                <option value="Restauration">Restauration</option>
+                <option value="Quincaillerie">Quincaillerie</option>
+                <option value="Beauté & Cosmétiques">Beauté & Cosmétiques</option>
+                <option value="Optique / Lunetterie">Optique / Lunetterie</option>
+                <option value="Autre">Autre</option>
               </select>
             </div>
             <div className="form-group">
