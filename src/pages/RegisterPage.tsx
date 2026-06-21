@@ -77,7 +77,7 @@ export const RegisterPage: React.FC = () => {
         email: formData.email,
       });
       // Registration successful
-      navigate('/admin');
+      navigate('/app');
     } catch (err: any) {
       setError("Erreur lors de l'inscription. Vérifiez la connexion à la base de données (DATABASE_URL sur Vercel).");
     }
