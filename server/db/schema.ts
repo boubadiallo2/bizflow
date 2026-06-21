@@ -68,6 +68,7 @@ export const sales = pgTable('sales', {
   method: varchar('method', { length: 50 }),
   status: varchar('status', { length: 50 }),
   cartItems: jsonb('cart_items'),
+  opticData: jsonb('optic_data'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -98,5 +99,8 @@ export const settings = pgTable('settings', {
   country: varchar('country', { length: 10 }),
   city: varchar('city', { length: 100 }),
   logo: text('logo'),
+  rccm: varchar('rccm', { length: 100 }),
+  ninea: varchar('ninea', { length: 100 }),
+  slogan: text('slogan'),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

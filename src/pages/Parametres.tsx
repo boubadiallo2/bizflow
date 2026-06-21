@@ -18,7 +18,10 @@ export const Parametres: React.FC = () => {
     city: '',
     phone: '',
     email: '',
-    address: ''
+    address: '',
+    rccm: '',
+    ninea: '',
+    slogan: ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +41,9 @@ export const Parametres: React.FC = () => {
             phone: data.phone || prev.phone,
             email: data.email || prev.email,
             address: data.address || prev.address,
+            rccm: data.rccm || '',
+            ninea: data.ninea || '',
+            slogan: data.slogan || ''
           }));
         }
       } catch (e) {
@@ -280,6 +286,43 @@ export const Parametres: React.FC = () => {
               value={companyInfo.address} 
               onChange={handleChange}
               placeholder="Ex: 123 Rue de la République"
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">RCCM</label>
+              <input 
+                type="text" 
+                name="rccm"
+                className="form-input" 
+                value={companyInfo.rccm} 
+                onChange={handleChange}
+                placeholder="Ex: SN.DKR.2026.B.1234"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">NINEA</label>
+              <input 
+                type="text" 
+                name="ninea"
+                className="form-input" 
+                value={companyInfo.ninea} 
+                onChange={handleChange}
+                placeholder="Ex: 000000000"
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Slogan de la facture</label>
+            <input 
+              type="text" 
+              name="slogan"
+              className="form-input" 
+              value={companyInfo.slogan} 
+              onChange={handleChange}
+              placeholder="Ex: La vue est chère mais pas les lunettes"
             />
           </div>
 
