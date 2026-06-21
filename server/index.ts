@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
-import { db } from './db';
-import { products, clients, suppliers, sales, quotes, settings } from './db/schema';
+import { db } from './db/index.js';
+import { products, clients, suppliers, sales, quotes, settings } from './db/schema.js';
 import { eq } from 'drizzle-orm';
 
 // Charge l'environnement
