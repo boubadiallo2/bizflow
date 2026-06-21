@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2, Printer, Download } from 'lucide-react';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { productsService, invoicesService } from '../services/apiService';
@@ -140,11 +142,24 @@ export const Facturation: React.FC = () => {
     return (
       <div className="print-view-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--color-bg)', zIndex: 100, overflowY: 'auto', padding: '20px' }}>
         <div className="no-print" style={{ marginBottom: '24px', display: 'flex', gap: '16px', maxWidth: '210mm', margin: '0 auto 24px auto' }}>
-          <Button variant="secondary" onClick={() => { setViewingInvoice(null); setIsCreating(false); }} icon={<ArrowLeft size={18} />}>Terminer</Button>
-          <Button variant="primary" onClick={() => { setTimeout(() => window.print(), 100); }} icon={<FileText size={18} />}>Imprimer</Button>
+          <Button variant="secondary" onClick={() => { setViewingInvoice(null); setIsCreating(false); }} icon={<ArrowLeft size={18} />}>Retour</Button>
+          <div style={{ display: 'flex', gap: '16px', marginLeft: 'auto' }}>
+            <Button variant="secondary" onClick={() => { setTimeout(() => window.print(), 100); }} icon={<Printer size={18} />}>Imprimer</Button>
+            <Button variant="primary" onClick={() => {
+              const element = document.getElementById('invoice-pdf-content');
+              const opt = {
+                margin:       0,
+                filename:     `Facture_${viewingInvoice.invoiceNumber || 'Optique'}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+              };
+              html2pdf().set(opt).from(element).save();
+            }} icon={<Download size={18} />}>Télécharger PDF</Button>
+          </div>
         </div>
         
-        <div className="optic-invoice-document" style={{ width: '210mm', minHeight: '297mm', padding: '20mm', margin: '0 auto', backgroundColor: 'white', color: '#00a3e0', fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
+        <div id="invoice-pdf-content" className="optic-invoice-document" style={{ width: '210mm', minHeight: '297mm', padding: '20mm', margin: '0 auto', backgroundColor: 'white', color: '#00a3e0', fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
           
           <div style={{ textAlign: 'center', marginBottom: '10px' }}>
             {companySettings?.logo ? (
@@ -518,7 +533,7 @@ export const Facturation: React.FC = () => {
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         {commerceType === 'Optique / Lunetterie' ? (
-                          <Button variant="secondary" onClick={() => setViewingInvoice(invoice)} icon={<FileText size={16} />}>Imprimer / Télécharger (PDF)</Button>
+                          <Button variant="secondary" onClick={() => setViewingInvoice(invoice)} icon={<FileText size={16} />}>Aperçu</Button>
                         ) : (
                           <Button variant="secondary" onClick={() => alert("Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
                         )}
