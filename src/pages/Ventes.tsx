@@ -37,9 +37,13 @@ export const Ventes: React.FC = () => {
   }, []);
 
   const filteredSales = useMemo(() => {
-    if (!searchQuery) return sales;
-    const lower = searchQuery.toLowerCase();
-    return sales.filter(s => s.ticketId && s.ticketId.toLowerCase().includes(lower));
+    let result = [...sales];
+    if (searchQuery) {
+      const lower = searchQuery.toLowerCase();
+      result = result.filter(s => s.ticketId && s.ticketId.toLowerCase().includes(lower));
+    }
+    // Sort by date descending (most recent first)
+    return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [sales, searchQuery]);
 
   if (isCreating) {
