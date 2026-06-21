@@ -658,8 +658,8 @@ export const PointDeVente: React.FC = () => {
                 <div style={{ marginBottom: '16px' }}>
                   {receiptData.cartItems.map((item: any, idx: number) => (
                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem' }}>
-                      <span>{item.quantity}x {item.product.name}</span>
-                      <span>{(item.quantity * item.product.priceValue).toLocaleString('fr-FR')} F</span>
+                      <span>{item.quantity}x {item.productName || item.product?.name}</span>
+                      <span>{(item.quantity * (item.priceValue || item.product?.priceValue || 0)).toLocaleString('fr-FR')} F</span>
                     </div>
                   ))}
                 </div>
