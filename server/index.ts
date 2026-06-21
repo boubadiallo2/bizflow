@@ -339,9 +339,13 @@ app.get('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
 
 app.post('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
   try {
-    const newItem = await db.insert(quotes).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
+    const payload = { ...req.body, tenantId: req.user!.tenantId! };
+    if (payload.date) payload.date = new Date(payload.date);
+    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
+    const newItem = await db.insert(quotes).values(payload).returning();
     res.json(newItem[0]);
   } catch (err: any) {
+    console.error("Erreur POST /api/quotes:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -349,8 +353,11 @@ app.post('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
 app.put('/api/quotes/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    const payload = { ...req.body };
+    if (payload.date) payload.date = new Date(payload.date);
+    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
     const updated = await db.update(quotes)
-      .set(req.body)
+      .set(payload)
       .where(and(eq(quotes.id, id), eq(quotes.tenantId, req.user!.tenantId!)))
       .returning();
     res.json(updated[0]);
