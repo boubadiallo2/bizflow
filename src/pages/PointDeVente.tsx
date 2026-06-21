@@ -649,7 +649,7 @@ export const PointDeVente: React.FC = () => {
                 <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>Ticket #{receiptData.id}</p>
               </div>
 
-              <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '24px' }}>
+              <div id="receipt-print-area" style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '24px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '16px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '16px' }}>
                   <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem' }}>BIZFLOW ERP</h3>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{new Date(receiptData.date).toLocaleString('fr-FR')}</p>

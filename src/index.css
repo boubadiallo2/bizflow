@@ -271,3 +271,33 @@ button {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receipt-print-area, #receipt-print-area * {
+    visibility: visible;
+  }
+  #receipt-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 350px;
+    margin: 0;
+    padding: 20px !important;
+    background-color: white !important;
+  }
+  .modal-overlay {
+    position: absolute;
+    padding: 0;
+    background: transparent;
+  }
+  .modal-content {
+    box-shadow: none;
+    border: none;
+    max-width: none;
+  }
+}
+
