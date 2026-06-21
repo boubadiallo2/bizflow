@@ -67,16 +67,20 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
-    // Save to Firebase
-    await settingsService.save({
-      ownerName: formData.name,
-      name: formData.company,
-      commerceType: formData.commerceType,
-      selectedProducts: formData.selectedProducts,
-      email: formData.email,
-    });
-    // Simulate registration and redirect
-    navigate('/app');
+    try {
+      // Save settings
+      await settingsService.save({
+        ownerName: formData.name,
+        name: formData.company,
+        commerceType: formData.commerceType,
+        selectedProducts: formData.selectedProducts,
+        email: formData.email,
+      });
+      // Registration successful
+      navigate('/admin');
+    } catch (err: any) {
+      setError("Erreur lors de l'inscription. Vérifiez la connexion à la base de données (DATABASE_URL sur Vercel).");
+    }
   };
 
   return (
