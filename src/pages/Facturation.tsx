@@ -147,7 +147,7 @@ export const Facturation: React.FC = () => {
             const opt = {
               margin:       0,
               filename:     `Facture_${viewingInvoice.invoiceNumber || 'Optique'}.pdf`,
-              image:        { type: 'jpeg', quality: 0.98 },
+              image:        { type: 'jpeg' as const, quality: 0.98 },
               html2canvas:  { scale: 2, useCORS: true },
               jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
@@ -171,10 +171,11 @@ export const Facturation: React.FC = () => {
             <Button variant="secondary" onClick={() => { setTimeout(() => window.print(), 100); }} icon={<Printer size={18} />}>Imprimer</Button>
             <Button variant="primary" onClick={() => {
               const element = document.getElementById('invoice-pdf-content');
+              if (!element) return;
               const opt = {
                 margin:       0,
                 filename:     `Facture_${viewingInvoice.invoiceNumber || 'Optique'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
+                image:        { type: 'jpeg' as const, quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
               };
