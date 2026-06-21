@@ -133,6 +133,7 @@ export const PointDeVente: React.FC = () => {
         imageUrl: p.imageUrl
       })));
       
+      window.dispatchEvent(new Event('inventory-updated'));
       alert("Produits générés avec succès !");
     } catch (e) {
       console.error(e);

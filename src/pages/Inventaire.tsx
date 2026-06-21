@@ -86,6 +86,7 @@ export const Inventaire: React.FC = () => {
       // Refresh from Firebase
       const updated = await productsService.getAll();
       setProducts(updated as ProductItem[]);
+      window.dispatchEvent(new Event('inventory-updated'));
       
       setIsProductModalOpen(false);
       setNewProduct({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '' });
@@ -134,6 +135,7 @@ export const Inventaire: React.FC = () => {
       await productsService.remove(id);
       const updated = await productsService.getAll();
       setProducts(updated as ProductItem[]);
+      window.dispatchEvent(new Event('inventory-updated'));
     }
   };
 
@@ -150,6 +152,7 @@ export const Inventaire: React.FC = () => {
       await productsService.update(product.id, { stock: newStock });
       const updated = await productsService.getAll();
       setProducts(updated as ProductItem[]);
+      window.dispatchEvent(new Event('inventory-updated'));
     }
     
     setIsStockModalOpen(false);

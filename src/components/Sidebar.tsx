@@ -16,6 +16,7 @@ import {
   Store,
   FileSignature
 } from 'lucide-react';
+import { productsService } from '../services/apiService';
 import './Sidebar.css';
 
 const navItems = [
@@ -25,7 +26,7 @@ const navItems = [
   { path: '/devis', icon: FileSignature, label: 'Devis' },
   { path: '/pos', icon: Monitor, label: 'Point de vente' },
   { path: '/facturation', icon: FileText, label: 'Facturation' },
-  { path: '/inventaire', icon: Package, label: 'Inventaire', badge: 3 },
+  { path: '/inventaire', icon: Package, label: 'Inventaire' },
   { path: '/clients', icon: Users, label: 'Clients' },
   { path: '/fournisseurs', icon: Truck, label: 'Fournisseurs' },
   { path: '/rapports', icon: PieChart, label: 'Rapports' },
@@ -42,13 +43,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
   const [companyLogo, setCompanyLogo] = useState<string | null>(
     localStorage.getItem('company_logo')
   );
+  const [alertsCount, setAlertsCount] = useState(0);
 
   useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const products = await productsService.getAll();
+        const count = products.filter((p: any) => p.stock <= (p.minStock || 5)).length;
+        setAlertsCount(count);
+      } catch (e) {
+        console.error("Erreur alertes inventaire:", e);
+      }
+    };
+    
+    fetchAlerts();
+
     const handleLogoUpdate = () => {
       setCompanyLogo(localStorage.getItem('company_logo'));
     };
+    
     window.addEventListener('logo-updated', handleLogoUpdate);
-    return () => window.removeEventListener('logo-updated', handleLogoUpdate);
+    window.addEventListener('inventory-updated', fetchAlerts);
+    
+    return () => {
+      window.removeEventListener('logo-updated', handleLogoUpdate);
+      window.removeEventListener('inventory-updated', fetchAlerts);
+    };
   }, []);
 
   return (
@@ -70,7 +90,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
       </div>
       
       <nav className="sidebar-nav">
-        {navItems.map((item) => (
+        {navItems.map((item) => {
+          const badgeValue = item.path === '/inventaire' ? (alertsCount > 0 ? alertsCount : undefined) : (item as any).badge;
+          return (
           <NavLink 
             key={item.path} 
             to={item.path}
@@ -79,9 +101,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
           >
             <item.icon size={20} className="nav-icon" />
             {!isCollapsed && <span className="nav-label">{item.label}</span>}
-            {!isCollapsed && item.badge && <span className="nav-badge">{item.badge}</span>}
+            {!isCollapsed && badgeValue && <span className="nav-badge">{badgeValue}</span>}
           </NavLink>
-        ))}
+        )})}
       </nav>
 
       <div className="sidebar-footer">
