@@ -6,10 +6,11 @@ import { salesService } from '../services/apiService';
 import './Ventes.css';
 
 interface Sale {
-  id: string;
+  id: number;
+  ticketId: string;
   date: string;
   amount: number;
-  items: number;
+  itemsCount: number;
   method: string;
   status: string;
 }
@@ -38,7 +39,7 @@ export const Ventes: React.FC = () => {
   const filteredSales = useMemo(() => {
     if (!searchQuery) return sales;
     const lower = searchQuery.toLowerCase();
-    return sales.filter(s => s.id.toLowerCase().includes(lower));
+    return sales.filter(s => s.ticketId && s.ticketId.toLowerCase().includes(lower));
   }, [sales, searchQuery]);
 
   if (isCreating) {
@@ -184,7 +185,7 @@ export const Ventes: React.FC = () => {
             <tbody>
               {filteredSales.map((sale) => (
                 <tr key={sale.id}>
-                  <td style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{sale.id}</td>
+                  <td style={{ fontWeight: 600, color: 'var(--color-primary)' }}>{sale.ticketId}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Calendar size={14} style={{ color: 'var(--color-text-muted)' }} />
@@ -194,7 +195,7 @@ export const Ventes: React.FC = () => {
                       })}
                     </div>
                   </td>
-                  <td>{sale.items} article(s)</td>
+                  <td>{sale.itemsCount} article(s)</td>
                   <td style={{ fontWeight: 600 }}>{sale.amount.toLocaleString('fr-FR')} F</td>
                   <td>{sale.method}</td>
                   <td>
