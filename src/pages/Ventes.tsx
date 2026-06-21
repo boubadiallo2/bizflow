@@ -23,6 +23,8 @@ export const Ventes: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [, setLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+  const [newPaymentMethod, setNewPaymentMethod] = useState('Espèces');
 
   // States for creating a new order
   const [clients, setClients] = useState<any[]>([]);
@@ -156,6 +158,24 @@ export const Ventes: React.FC = () => {
       alert("Erreur lors de la création de la commande.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdatePayment = async () => {
+    if (!selectedSale) return;
+    try {
+      await salesService.update(selectedSale.id, {
+        method: newPaymentMethod,
+      });
+      // Refresh sales list
+      const data = await salesService.getAll();
+      setSales(data as Sale[]);
+      // Update the current modal state to reflect the new payment method
+      setSelectedSale({ ...selectedSale, method: newPaymentMethod });
+      setIsUpdatingPayment(false);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du paiement:", error);
+      alert("Erreur lors de la mise à jour.");
     }
   };
 
@@ -449,8 +469,32 @@ export const Ventes: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="modal-footer" style={{ borderTop: '1px solid var(--color-border)', paddingTop: '16px', marginTop: '16px' }}>
-              <Button variant="secondary" onClick={() => setSelectedSale(null)} style={{ marginLeft: 'auto' }}>Fermer</Button>
+            <div className="modal-footer" style={{ borderTop: '1px solid var(--color-border)', paddingTop: '16px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {selectedSale.method === 'A crédit' ? (
+                isUpdatingPayment ? (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select 
+                      className="filter-select"
+                      value={newPaymentMethod}
+                      onChange={(e) => setNewPaymentMethod(e.target.value)}
+                    >
+                      <option value="Espèces">Espèces</option>
+                      <option value="Wave">Wave</option>
+                      <option value="Orange Money">Orange Money</option>
+                      <option value="Carte Bancaire">Carte Bancaire</option>
+                      <option value="Chèque">Chèque</option>
+                      <option value="Virement">Virement</option>
+                    </select>
+                    <Button variant="primary" onClick={handleUpdatePayment}>Confirmer</Button>
+                    <Button variant="secondary" onClick={() => setIsUpdatingPayment(false)}>Annuler</Button>
+                  </div>
+                ) : (
+                  <Button variant="primary" onClick={() => setIsUpdatingPayment(true)}>Régler la commande</Button>
+                )
+              ) : (
+                <div />
+              )}
+              <Button variant="secondary" onClick={() => { setSelectedSale(null); setIsUpdatingPayment(false); }} style={{ marginLeft: 'auto' }}>Fermer</Button>
             </div>
           </div>
         </div>
