@@ -276,6 +276,22 @@ app.post('/api/sales', authenticateToken, requireTenant, async (req, res) => {
       payload.date = new Date(payload.date);
     }
     const newItem = await db.insert(sales).values(payload).returning();
+    
+    // Mettre à jour le stock des produits vendus
+    if (payload.cartItems && Array.isArray(payload.cartItems)) {
+      for (const item of payload.cartItems) {
+        if (item.productId && item.quantity) {
+          const productRecords = await db.select().from(products).where(and(eq(products.id, item.productId), eq(products.tenantId, req.user!.tenantId!)));
+          if (productRecords.length > 0) {
+            const product = productRecords[0];
+            const currentStock = product.stock || 0;
+            const newStock = Math.max(0, currentStock - item.quantity);
+            await db.update(products).set({ stock: newStock }).where(eq(products.id, product.id));
+          }
+        }
+      }
+    }
+
     res.json(newItem[0]);
   } catch (err: any) {
     console.error('Erreur POST /api/sales:', err);
