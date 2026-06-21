@@ -1,0 +1,60 @@
+.admin-clients-container {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Inherits most table styles from AdminAbonnements layout concepts */
+/* but we declare them here or they should be globally shared. For this app, we redefine the specifics to avoid conflicts */
+
+.metrics-badge {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.metric-divider {
+  width: 1px;
+  height: 40px;
+  background-color: var(--color-border);
+}
+
+.sector-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.date-cell, .metric-cell {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  font-weight: 500;
+}

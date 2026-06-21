@@ -1,0 +1,255 @@
+.parametres-container {
+  padding: 0;
+  max-width: 800px;
+}
+
+.parametres-header {
+  margin-bottom: 24px;
+}
+
+.parametres-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.parametres-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.settings-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 24px;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.form-input,
+.form-select {
+  padding: 10px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.form-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-start; /* Actually the button seems to span full width or left aligned, let's make it full width if it looks like a large button at the bottom */
+}
+
+.form-actions button {
+  width: 100%; /* Making it full width as only the top of it is visible and seems wide */
+}
+
+/* Logo Upload */
+.logo-card {
+  margin-bottom: 24px;
+}
+
+.logo-upload-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.logo-preview-wrapper {
+  flex-shrink: 0;
+}
+
+.logo-preview-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-md);
+  overflow: visible;
+}
+
+.logo-preview-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-border);
+  background: #fff;
+  padding: 6px;
+}
+
+.logo-remove-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-danger, #ef4444);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.logo-remove-btn:hover {
+  transform: scale(1.15);
+  background: #dc2626;
+}
+
+.logo-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted, #94a3b8);
+  background: var(--color-surface);
+}
+
+.logo-upload-content {
+  flex: 1;
+}
+
+.logo-dropzone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--color-surface);
+}
+
+.logo-dropzone:hover {
+  border-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.logo-dropzone.dragging {
+  border-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.08);
+  transform: scale(1.01);
+}
+
+.dropzone-icon {
+  color: var(--color-primary);
+  margin-bottom: 10px;
+}
+
+.dropzone-text {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.dropzone-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dropzone-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.logo-saved-toast {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.06));
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary, #10b981);
+  font-size: 0.88rem;
+  font-weight: 500;
+  animation: toast-slide-in 0.3s ease;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .logo-upload-area {
+    flex-direction: column;
+    align-items: center;
+  }
+}

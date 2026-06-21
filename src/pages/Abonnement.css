@@ -1,0 +1,57 @@
+.abonnement-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+}
+
+.abonnement-container h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.plan-header {
+  margin-bottom: 24px;
+}
+
+.status-badge {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.plan-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: var(--color-bg);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.feature-item {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.upgrade-card {
+  box-shadow: none;
+}
