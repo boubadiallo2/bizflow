@@ -104,3 +104,19 @@ export const settings = pgTable('settings', {
   slogan: text('slogan'),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const invoices = pgTable('invoices', {
+  id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
+  invoiceNumber: varchar('invoice_number', { length: 100 }).notNull(),
+  client: varchar('client', { length: 255 }),
+  date: timestamp('date').defaultNow(),
+  dueDate: timestamp('due_date'),
+  totalHT: integer('total_ht'),
+  tva: integer('tva'),
+  totalTTC: integer('total_ttc'),
+  status: varchar('status', { length: 50 }),
+  lines: jsonb('lines'),
+  opticData: jsonb('optic_data'),
+  createdAt: timestamp('created_at').defaultNow(),
+});

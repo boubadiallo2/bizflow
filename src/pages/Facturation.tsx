@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { productsService } from '../services/apiService';
+import { productsService, invoicesService } from '../services/apiService';
 import './Facturation.css';
 
 interface ProductItem {
@@ -32,6 +32,7 @@ export const Facturation: React.FC = () => {
   const [lines, setLines] = useState<InvoiceLine[]>([
     { id: Date.now().toString(), productId: '', productName: '', quantity: 1, unitPrice: 0 }
   ]);
+  const [invoicesList, setInvoicesList] = useState<any[]>([]);
   const [commerceType, setCommerceType] = useState('');
   const [companySettings, setCompanySettings] = useState<any>(null);
   const [viewingInvoice, setViewingInvoice] = useState<any>(null);
@@ -81,11 +82,13 @@ export const Facturation: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [productsData, settingsData] = await Promise.all([
+        const [productsData, settingsData, invoicesData] = await Promise.all([
           productsService.getAll(),
-          import('../services/apiService').then(m => m.settingsService.get())
+          import('../services/apiService').then(m => m.settingsService.get()),
+          invoicesService.getAll()
         ]);
         setProducts(productsData as ProductItem[]);
+        setInvoicesList(invoicesData);
         if (settingsData) {
           setCompanySettings(settingsData);
           if (settingsData.commerceType) {
@@ -99,25 +102,40 @@ export const Facturation: React.FC = () => {
     loadData();
   }, []);
 
-  const handleCreateInvoice = () => {
-    if (commerceType === 'Optique / Lunetterie') {
-      const invoiceData = {
-        date: new Date().toISOString(),
-        amount: totalTTC,
-        opticData: {
-          ...opticData,
-          reste: totalTTC - (opticData.avance || 0)
-        }
-      };
-      setViewingInvoice(invoiceData);
-    } else {
-      setIsCreating(false);
+  const handleCreateInvoice = async () => {
+    const invoiceData = {
+      invoiceNumber: `FAC-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2, '0')}-${Math.floor(Math.random()*1000).toString().padStart(3, '0')}`,
+      date: new Date().toISOString(),
+      amount: totalTTC,
+      totalHT: montantHT,
+      tva: tva,
+      totalTTC: totalTTC,
+      status: 'Payée',
+      lines: lines,
+      opticData: commerceType === 'Optique / Lunetterie' ? {
+        ...opticData,
+        reste: totalTTC - (opticData.avance || 0)
+      } : null
+    };
+
+    try {
+      await invoicesService.add(invoiceData);
+      const updatedInvoices = await invoicesService.getAll();
+      setInvoicesList(updatedInvoices);
+
+      if (commerceType === 'Optique / Lunetterie') {
+        setViewingInvoice(invoiceData);
+      } else {
+        setIsCreating(false);
+      }
+    } catch (e) {
+      console.error("Erreur création facture", e);
     }
   };
 
   if (viewingInvoice && commerceType === 'Optique / Lunetterie') {
     const optic = viewingInvoice.opticData || {};
-    const subtotal = viewingInvoice.amount;
+    const subtotal = viewingInvoice.amount || viewingInvoice.totalTTC;
     
     return (
       <div className="print-view-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--color-bg)', zIndex: 100, overflowY: 'auto', padding: '20px' }}>
@@ -401,12 +419,20 @@ export const Facturation: React.FC = () => {
     );
   }
 
+  const caFacture = invoicesList.reduce((sum, inv) => sum + (inv.totalTTC || inv.amount || 0), 0);
+  const encaisse = invoicesList.reduce((sum, inv) => {
+    if (inv.opticData?.avance) return sum + inv.opticData.avance;
+    if (inv.status === 'Payée') return sum + (inv.totalTTC || inv.amount || 0);
+    return sum;
+  }, 0);
+  const impaye = caFacture - encaisse;
+
   return (
     <div className="facturation-container">
       <div className="page-header flex justify-between items-center">
         <div>
           <h2>Facturation</h2>
-          <p className="text-muted text-sm mt-1">0 facture</p>
+          <p className="text-muted text-sm mt-1">{invoicesList.length} facture{invoicesList.length > 1 ? 's' : ''}</p>
         </div>
         <Button variant="primary" onClick={() => setIsCreating(true)}>+ Nouvelle facture</Button>
       </div>
@@ -419,7 +445,7 @@ export const Facturation: React.FC = () => {
               <Banknote size={20} />
             </div>
           </div>
-          <div className="stat-value">0 F</div>
+          <div className="stat-value">{caFacture.toLocaleString('fr-FR')} F</div>
         </Card>
 
         <Card className="stat-card bg-primary-light">
@@ -429,7 +455,7 @@ export const Facturation: React.FC = () => {
               <Banknote size={20} />
             </div>
           </div>
-          <div className="stat-value">0 F</div>
+          <div className="stat-value">{encaisse.toLocaleString('fr-FR')} F</div>
         </Card>
 
         <Card className="stat-card">
@@ -439,7 +465,7 @@ export const Facturation: React.FC = () => {
               <AlertTriangle size={18} />
             </div>
           </div>
-          <div className="stat-value">0 F</div>
+          <div className="stat-value">{impaye.toLocaleString('fr-FR')} F</div>
         </Card>
       </div>
 
@@ -460,14 +486,51 @@ export const Facturation: React.FC = () => {
         </select>
       </div>
 
-      <div className="empty-state">
-        <div className="empty-icon">
-          <FileText size={32} className="text-muted" />
+      {invoicesList.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">
+            <FileText size={32} className="text-muted" />
+          </div>
+          <h3>Aucune facture</h3>
+          <p className="text-muted mb-4">Créez votre première facture</p>
+          <Button variant="primary" onClick={() => setIsCreating(true)}>+ Nouvelle facture</Button>
         </div>
-        <h3>Aucune facture</h3>
-        <p className="text-muted mb-4">Créez votre première facture</p>
-        <Button variant="primary" onClick={() => setIsCreating(true)}>+ Nouvelle facture</Button>
-      </div>
+      ) : (
+        <Card style={{ marginTop: '24px' }}>
+          <div className="table-responsive">
+            <table className="data-table" style={{ width: '100%', textAlign: 'left' }}>
+              <thead>
+                <tr>
+                  <th style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>N° Facture</th>
+                  <th style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>Date</th>
+                  <th style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>Montant TTC</th>
+                  <th style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>Statut</th>
+                  <th style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoicesList.map((invoice: any) => (
+                  <tr key={invoice.id}>
+                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>{invoice.invoiceNumber}</td>
+                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>{new Date(invoice.date).toLocaleDateString('fr-FR')}</td>
+                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>{invoice.totalTTC ? invoice.totalTTC.toLocaleString('fr-FR') : (invoice.amount?.toLocaleString('fr-FR') || 0)} F</td>
+                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}><span className="status-badge status-payee" style={{ backgroundColor: '#e6f4ea', color: '#1e8e3e', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>{invoice.status || 'Payée'}</span></td>
+                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {commerceType === 'Optique / Lunetterie' ? (
+                          <Button variant="secondary" onClick={() => setViewingInvoice(invoice)} icon={<FileText size={16} />}>Imprimer / Télécharger (PDF)</Button>
+                        ) : (
+                          <Button variant="secondary" onClick={() => alert("Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from './db/index.js';
-import { products, clients, suppliers, sales, quotes, settings, tenants, users } from './db/schema.js';
+import { products, clients, suppliers, sales, quotes, settings, tenants, users, invoices } from './db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { authenticateToken, requireAdmin } from './middleware/auth.js';
 
@@ -370,6 +370,57 @@ app.delete('/api/quotes/:id', authenticateToken, requireTenant, async (req, res)
   try {
     const id = parseInt(req.params.id);
     await db.delete(quotes).where(and(eq(quotes.id, id), eq(quotes.tenantId, req.user!.tenantId!)));
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- INVOICES ---
+app.get('/api/invoices', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const data = await db.select().from(invoices).where(eq(invoices.tenantId, req.user!.tenantId!));
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/invoices', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const payload = { ...req.body, tenantId: req.user!.tenantId! };
+    if (payload.date) payload.date = new Date(payload.date);
+    if (payload.dueDate) payload.dueDate = new Date(payload.dueDate);
+    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
+    const newItem = await db.insert(invoices).values(payload).returning();
+    res.json(newItem[0]);
+  } catch (err: any) {
+    console.error("Erreur POST /api/invoices:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/invoices/:id', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const payload = { ...req.body };
+    if (payload.date) payload.date = new Date(payload.date);
+    if (payload.dueDate) payload.dueDate = new Date(payload.dueDate);
+    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
+    const updated = await db.update(invoices)
+      .set(payload)
+      .where(and(eq(invoices.id, id), eq(invoices.tenantId, req.user!.tenantId!)))
+      .returning();
+    res.json(updated[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/invoices/:id', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(invoices).where(and(eq(invoices.id, id), eq(invoices.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

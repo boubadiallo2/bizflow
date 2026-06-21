@@ -147,6 +147,14 @@ export const quotesService = {
   remove: (id: string | number) => remove('quotes', id),
 };
 
+export const invoicesService = {
+  getAll: () => getAll<any>('invoices'),
+  getById: (id: string | number) => getById<any>('invoices', id),
+  add: (data: any) => add('invoices', data),
+  update: (id: string | number, data: any) => update('invoices', id, data),
+  remove: (id: string | number) => remove('invoices', id),
+};
+
 export const settingsService = {
   get: () => getById<any>('settings', 'company'),
   save: (data: any) => add('settings', data), 
