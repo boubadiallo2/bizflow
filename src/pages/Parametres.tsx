@@ -2,24 +2,27 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Settings, Building2, Upload, X, ImageIcon } from 'lucide-react';
 import { Button } from '../components/Button';
 import { settingsService } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
 import './Parametres.css';
 
 export const Parametres: React.FC = () => {
+  const { name } = useAuth();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [logoSaved, setLogoSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({
-    name: 'Boubacar Diallo',
+    name: name || '',
     commerceType: 'restaurant',
     country: 'sn',
-    city: 'Dakar',
-    phone: '773858381',
-    email: 'Boudiallo20@gmail.com',
-    address: 'Dakar'
+    city: '',
+    phone: '',
+    email: '',
+    address: ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load from Firebase
+  // Load from backend
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -44,6 +47,28 @@ export const Parametres: React.FC = () => {
     loadSettings();
   }, []);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setCompanyInfo(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      await settingsService.save({ ...companyInfo, logo: logoPreview });
+      alert('Paramètres enregistrés avec succès !');
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de l\'enregistrement des paramètres.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleLogoChange = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Veuillez sélectionner un fichier image (PNG, JPG, SVG, etc.)');
@@ -58,13 +83,15 @@ export const Parametres: React.FC = () => {
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
       setLogoPreview(base64);
-      // Save to Firebase
-      await settingsService.save({ ...companyInfo, logo: base64 });
-      // Also keep in localStorage for Sidebar real-time update
-      localStorage.setItem('company_logo', base64);
-      setLogoSaved(true);
-      setTimeout(() => setLogoSaved(false), 3000);
-      window.dispatchEvent(new Event('logo-updated'));
+      try {
+        await settingsService.save({ ...companyInfo, logo: base64 });
+        localStorage.setItem('company_logo', base64);
+        setLogoSaved(true);
+        setTimeout(() => setLogoSaved(false), 3000);
+        window.dispatchEvent(new Event('logo-updated'));
+      } catch (err) {
+        console.error(err);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -93,9 +120,13 @@ export const Parametres: React.FC = () => {
   const removeLogo = async () => {
     setLogoPreview(null);
     localStorage.removeItem('company_logo');
-    await settingsService.save({ ...companyInfo, logo: null });
-    if (fileInputRef.current) fileInputRef.current.value = '';
-    window.dispatchEvent(new Event('logo-updated'));
+    try {
+      await settingsService.save({ ...companyInfo, logo: null });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      window.dispatchEvent(new Event('logo-updated'));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -168,20 +199,24 @@ export const Parametres: React.FC = () => {
           Informations de l'entreprise
         </div>
         
-        <form className="settings-form" onSubmit={(e) => e.preventDefault()}>
+        <form className="settings-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Nom de l'entreprise</label>
             <input 
               type="text" 
+              name="name"
               className="form-input" 
-              defaultValue="Boubacar Diallo" 
+              value={companyInfo.name} 
+              onChange={handleChange}
+              placeholder="Ex: Mon Entreprise"
+              required
             />
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Type de commerce</label>
-              <select className="form-select" defaultValue="restaurant">
+              <select name="commerceType" className="form-select" value={companyInfo.commerceType} onChange={handleChange}>
                 <option value="restaurant">Restaurant</option>
                 <option value="retail">Boutique / Détail</option>
                 <option value="services">Services</option>
@@ -190,7 +225,7 @@ export const Parametres: React.FC = () => {
             </div>
             <div className="form-group">
               <label className="form-label">Pays</label>
-              <select className="form-select" defaultValue="sn">
+              <select name="country" className="form-select" value={companyInfo.country} onChange={handleChange}>
                 <option value="sn">Sénégal</option>
                 <option value="ml">Mali</option>
                 <option value="ci">Côte d'Ivoire</option>
@@ -203,8 +238,11 @@ export const Parametres: React.FC = () => {
             <label className="form-label">Ville</label>
             <input 
               type="text" 
+              name="city"
               className="form-input" 
-              defaultValue="Dakar" 
+              value={companyInfo.city} 
+              onChange={handleChange}
+              placeholder="Ex: Dakar"
             />
           </div>
 
@@ -212,8 +250,11 @@ export const Parametres: React.FC = () => {
             <label className="form-label">Téléphone</label>
             <input 
               type="tel" 
+              name="phone"
               className="form-input" 
-              defaultValue="773858381" 
+              value={companyInfo.phone} 
+              onChange={handleChange}
+              placeholder="Ex: 77 000 00 00"
             />
           </div>
 
@@ -221,8 +262,11 @@ export const Parametres: React.FC = () => {
             <label className="form-label">Email</label>
             <input 
               type="email" 
+              name="email"
               className="form-input" 
-              defaultValue="Boudiallo20@gmail.com" 
+              value={companyInfo.email} 
+              onChange={handleChange}
+              placeholder="Ex: contact@monentreprise.com"
             />
           </div>
 
@@ -230,13 +274,18 @@ export const Parametres: React.FC = () => {
             <label className="form-label">Adresse</label>
             <input 
               type="text" 
+              name="address"
               className="form-input" 
-              defaultValue="Dakar" 
+              value={companyInfo.address} 
+              onChange={handleChange}
+              placeholder="Ex: 123 Rue de la République"
             />
           </div>
 
           <div className="form-actions">
-            <Button variant="primary" type="submit">Enregistrer les modifications</Button>
+            <Button variant="primary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            </Button>
           </div>
         </form>
       </div>

@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, User, AlertCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import './Header.css';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const { name, logout } = useAuth();
 
   const handleLogout = () => {
     if (sessionStorage.getItem('pos_isCaisseOpen') === 'true') {
       setShowErrorModal(true);
       return;
     }
-    // Dans une vraie application, on viderait le localStorage/state ici
-    navigate('/');
+    logout();
   };
 
   return (
@@ -23,7 +24,7 @@ export const Header: React.FC = () => {
           <div className="avatar">
             <User size={18} />
           </div>
-          <span className="user-name">Boubacar Diallo</span>
+          <span className="user-name">{name || 'Utilisateur'}</span>
         </div>
         <button className="logout-btn" onClick={handleLogout}>
           <LogOut size={18} />
