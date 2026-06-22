@@ -467,6 +467,16 @@ export const Facturation: React.FC = () => {
   }, 0);
   const impaye = caFacture - encaisse;
 
+  const updateInvoiceStatus = async (id: string, newStatus: string) => {
+    try {
+      await invoicesService.update(id, { status: newStatus });
+      const updated = await invoicesService.getAll();
+      setInvoicesList(updated);
+    } catch (e) {
+      console.error("Erreur mise à jour statut facture", e);
+    }
+  };
+
   return (
     <div className="facturation-container">
       <div className="page-header flex justify-between items-center">
@@ -554,12 +564,37 @@ export const Facturation: React.FC = () => {
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>{invoice.invoiceNumber}</td>
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>{new Date(invoice.date).toLocaleDateString('fr-FR')}</td>
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>{invoice.totalTTC ? invoice.totalTTC.toLocaleString('fr-FR') : (invoice.amount?.toLocaleString('fr-FR') || 0)} F</td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}><span className="status-badge status-payee" style={{ backgroundColor: '#e6f4ea', color: '#1e8e3e', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>{invoice.status || 'Payée'}</span></td>
+                    <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
+                      <select 
+                        value={invoice.status || 'Payée'}
+                        onChange={(e) => updateInvoiceStatus(invoice.id, e.target.value)}
+                        style={{ 
+                          padding: '6px 12px', 
+                          borderRadius: '20px', 
+                          fontSize: '0.8rem', 
+                          fontWeight: 600, 
+                          backgroundColor: (invoice.status || 'Payée') === 'Brouillon' ? 'var(--color-bg)' : 
+                                           (invoice.status || 'Payée') === 'Payée' ? '#e6f4ea' :
+                                           '#fee2e2', 
+                          color: (invoice.status || 'Payée') === 'Brouillon' ? 'var(--color-text)' : 
+                                 (invoice.status || 'Payée') === 'Payée' ? '#1e8e3e' :
+                                 '#dc2626',
+                          minWidth: '110px',
+                          textAlign: 'center',
+                          border: '1px solid transparent',
+                          cursor: 'pointer',
+                          outline: 'none',
+                        }}
+                      >
+                        <option value="Brouillon">Brouillon</option>
+                        <option value="Payée">Payée</option>
+                        <option value="Impayée">Impayée</option>
+                      </select>
+                    </td>
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         {commerceType === 'Optique / Lunetterie' ? (
                           <>
-                            <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('print'); }} icon={<Printer size={16} />}>Imprimer</Button>
                             <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('download'); }} icon={<Download size={16} />}>Télécharger</Button>
                           </>
                         ) : (
