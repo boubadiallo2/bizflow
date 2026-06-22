@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2, Printer, Download } from 'lucide-react';
+import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2, Printer, Download, Edit2 } from 'lucide-react';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import { Card } from '../components/Card';
@@ -47,6 +47,38 @@ export const Facturation: React.FC = () => {
     verre: false,
     avance: 0,
   });
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setLines([{ id: Date.now().toString(), productId: '', productName: '', quantity: 1, unitPrice: 0 }]);
+    setEditingInvoiceId(null);
+    setOpticData({ od: '', og: '', add: '', monture: false, verre: false, avance: 0 });
+    setApplyTVA(true);
+  };
+
+  const handleEditInvoice = (invoice: any) => {
+    if (invoice.lines && invoice.lines.length > 0) {
+      setLines([...invoice.lines]);
+    }
+    if (invoice.opticData) {
+      setOpticData(invoice.opticData);
+    }
+    setApplyTVA(invoice.tva > 0);
+    setEditingInvoiceId(invoice.id);
+    setIsCreating(true);
+  };
+
+  const handleDeleteInvoice = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) {
+      try {
+        await invoicesService.remove(id);
+        const updatedInvoices = await invoicesService.getAll();
+        setInvoicesList(updatedInvoices);
+      } catch (e) {
+        console.error("Erreur suppression facture", e);
+      }
+    }
+  };
 
   const handleAddLine = () => {
     setLines([...lines, { id: Date.now().toString(), productId: '', productName: '', quantity: 1, unitPrice: 0 }]);
@@ -107,13 +139,13 @@ export const Facturation: React.FC = () => {
 
   const handleCreateInvoice = async () => {
     const invoiceData = {
-      invoiceNumber: `FAC-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2, '0')}-${Math.floor(Math.random()*1000).toString().padStart(3, '0')}`,
+      invoiceNumber: editingInvoiceId ? invoicesList.find(i => i.id === editingInvoiceId)?.invoiceNumber : `FAC-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2, '0')}-${Math.floor(Math.random()*1000).toString().padStart(3, '0')}`,
       date: new Date().toISOString(),
       amount: totalTTC,
       totalHT: montantHT,
       tva: tva,
       totalTTC: totalTTC,
-      status: 'Payée',
+      status: editingInvoiceId ? invoicesList.find(i => i.id === editingInvoiceId)?.status || 'Payée' : 'Payée',
       lines: lines,
       opticData: commerceType === 'Optique / Lunetterie' ? {
         ...opticData,
@@ -122,7 +154,11 @@ export const Facturation: React.FC = () => {
     };
 
     try {
-      await invoicesService.add(invoiceData);
+      if (editingInvoiceId) {
+        await invoicesService.update(editingInvoiceId, invoiceData);
+      } else {
+        await invoicesService.add(invoiceData);
+      }
       const updatedInvoices = await invoicesService.getAll();
       setInvoicesList(updatedInvoices);
 
@@ -130,9 +166,10 @@ export const Facturation: React.FC = () => {
         setViewingInvoice(invoiceData);
       } else {
         setIsCreating(false);
+        resetForm();
       }
     } catch (e) {
-      console.error("Erreur création facture", e);
+      console.error("Erreur création/modification facture", e);
     }
   };
 
@@ -166,7 +203,7 @@ export const Facturation: React.FC = () => {
     return (
       <div className="print-view-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--color-bg)', zIndex: 100, overflowY: 'auto', padding: '20px' }}>
         <div className="no-print" style={{ marginBottom: '24px', display: 'flex', gap: '16px', maxWidth: '210mm', margin: '0 auto 24px auto' }}>
-          <Button variant="secondary" onClick={() => { setViewingInvoice(null); setIsCreating(false); }} icon={<ArrowLeft size={18} />}>Retour</Button>
+          <Button variant="secondary" onClick={() => { setViewingInvoice(null); setIsCreating(false); resetForm(); }} icon={<ArrowLeft size={18} />}>Retour</Button>
           <div style={{ display: 'flex', gap: '16px', marginLeft: 'auto' }}>
             <Button variant="secondary" onClick={() => { setTimeout(() => window.print(), 100); }} icon={<Printer size={18} />}>Imprimer</Button>
             <Button variant="primary" onClick={() => {
@@ -286,12 +323,12 @@ export const Facturation: React.FC = () => {
     return (
       <div className="facturation-container">
         <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-          <button onClick={() => setIsCreating(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--color-text)' }}>
+          <button onClick={() => { setIsCreating(false); resetForm(); }} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--color-text)' }}>
             <ArrowLeft size={24} />
           </button>
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Nouvelle facture</h2>
-            <p className="text-muted text-sm mt-1">Créez une facture manuellement</p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>{editingInvoiceId ? `Modifier la facture ${invoicesList.find(i => i.id === editingInvoiceId)?.invoiceNumber}` : 'Nouvelle facture'}</h2>
+            <p className="text-muted text-sm mt-1">{editingInvoiceId ? 'Mettez à jour les informations de la facture' : 'Créez une facture manuellement'}</p>
           </div>
         </div>
 
@@ -452,7 +489,7 @@ export const Facturation: React.FC = () => {
               <span>Total TTC</span>
               <span>{totalTTC.toLocaleString('fr-FR')} F</span>
             </div>
-            <Button variant="primary" onClick={handleCreateInvoice} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} icon={<FileText size={18} />}>Créer la facture</Button>
+            <Button variant="primary" onClick={handleCreateInvoice} style={{ width: '100%', display: 'flex', justifyContent: 'center' }} icon={<FileText size={18} />}>{editingInvoiceId ? 'Mettre à jour la facture' : 'Créer la facture'}</Button>
           </div>
         </div>
       </div>
@@ -600,6 +637,20 @@ export const Facturation: React.FC = () => {
                         ) : (
                           <Button variant="secondary" onClick={() => alert("Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
                         )}
+                        <button 
+                          onClick={() => handleEditInvoice(invoice)} 
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px' }} 
+                          title="Modifier"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteInvoice(invoice.id)} 
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '4px' }} 
+                          title="Supprimer"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </td>
                   </tr>
