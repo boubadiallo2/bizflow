@@ -3,6 +3,7 @@ import { Settings, Building2, Upload, X, ImageIcon } from 'lucide-react';
 import { Button } from '../components/Button';
 import { settingsService } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
+import { showSuccess, showError } from '../utils/notifications';
 import './Parametres.css';
 
 export const Parametres: React.FC = () => {
@@ -66,10 +67,10 @@ export const Parametres: React.FC = () => {
     setIsSaving(true);
     try {
       await settingsService.save({ ...companyInfo, logo: logoPreview });
-      alert('Paramètres enregistrés avec succès !');
+      showSuccess('Succès', 'Paramètres enregistrés avec succès !');
     } catch (err) {
       console.error(err);
-      alert('Erreur lors de l\'enregistrement des paramètres.');
+      showError('Erreur', 'Erreur lors de l\'enregistrement des paramètres.');
     } finally {
       setIsSaving(false);
     }
@@ -77,11 +78,11 @@ export const Parametres: React.FC = () => {
 
   const handleLogoChange = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Veuillez sélectionner un fichier image (PNG, JPG, SVG, etc.)');
+      showError('Format invalide', 'Veuillez sélectionner un fichier image (PNG, JPG, SVG, etc.)');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert('Le fichier est trop volumineux. Taille maximale : 2 Mo');
+      showError('Fichier trop lourd', 'Le fichier est trop volumineux. Taille maximale : 2 Mo');
       return;
     }
 

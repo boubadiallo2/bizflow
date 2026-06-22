@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ArrowDown, ArrowUp, Package, AlertTriangle, DollarSign, X, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { productsService } from '../services/apiService';
+import { showConfirm, showError, showSuccess } from '../utils/notifications';
 import './Inventaire.css';
 
 interface ProductItem {
@@ -88,12 +89,13 @@ export const Inventaire: React.FC = () => {
       setProducts(updated as ProductItem[]);
       window.dispatchEvent(new Event('inventory-updated'));
       
+      showSuccess("Succès", "Produit sauvegardé avec succès !");
       setIsProductModalOpen(false);
       setNewProduct({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '' });
       setEditingProductId(null);
     } catch (error) {
       console.error("Erreur lors de la sauvegarde du produit :", error);
-      alert("Une erreur est survenue lors de la sauvegarde.");
+      showError("Erreur", "Une erreur est survenue lors de la sauvegarde.");
     } finally {
       setIsSubmitting(false);
     }
@@ -131,7 +133,8 @@ export const Inventaire: React.FC = () => {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+    const confirmed = await showConfirm("Êtes-vous sûr de vouloir supprimer ce produit ?");
+    if (confirmed) {
       await productsService.remove(id);
       const updated = await productsService.getAll();
       setProducts(updated as ProductItem[]);

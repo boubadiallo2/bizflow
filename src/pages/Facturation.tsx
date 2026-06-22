@@ -5,6 +5,8 @@ import html2pdf from 'html2pdf.js';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { productsService, invoicesService } from '../services/apiService';
+import { showConfirm, showError, showSuccess } from '../utils/notifications';
+import Swal from 'sweetalert2';
 import './Facturation.css';
 
 interface ProductItem {
@@ -69,7 +71,8 @@ export const Facturation: React.FC = () => {
   };
 
   const handleDeleteInvoice = async (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) {
+    const confirmed = await showConfirm("Êtes-vous sûr de vouloir supprimer cette facture ?");
+    if (confirmed) {
       try {
         await invoicesService.remove(id);
         const updatedInvoices = await invoicesService.getAll();
@@ -145,7 +148,7 @@ export const Facturation: React.FC = () => {
       totalHT: montantHT,
       tva: tva,
       totalTTC: totalTTC,
-      status: editingInvoiceId ? invoicesList.find(i => i.id === editingInvoiceId)?.status || 'Payée' : 'Payée',
+      status: editingInvoiceId ? invoicesList.find(i => i.id === editingInvoiceId)?.status || 'Brouillon' : 'Brouillon',
       lines: lines,
       opticData: commerceType === 'Optique / Lunetterie' ? {
         ...opticData,
@@ -505,12 +508,57 @@ export const Facturation: React.FC = () => {
   const impaye = caFacture - encaisse;
 
   const updateInvoiceStatus = async (id: string, newStatus: string) => {
+    if (newStatus === 'Payée') {
+      const { value: method } = await Swal.fire({
+        title: 'Validation du paiement',
+        text: 'Choisissez le moyen de paiement utilisé par le client',
+        input: 'select',
+        inputOptions: {
+          'Espèces': 'Espèces',
+          'Wave': 'Wave',
+          'Orange Money': 'Orange Money',
+          'Carte Bancaire': 'Carte Bancaire',
+          'Chèque': 'Chèque',
+          'Virement': 'Virement'
+        },
+        inputPlaceholder: 'Sélectionner un moyen de paiement',
+        showCancelButton: true,
+        confirmButtonText: 'Valider',
+        cancelButtonText: 'Annuler',
+        customClass: {
+          confirmButton: 'btn btn-primary',
+          cancelButton: 'btn btn-secondary',
+          popup: 'swal-bizflow-popup'
+        }
+      });
+
+      if (!method) {
+        // User cancelled, we don't update the status
+        const updated = await invoicesService.getAll();
+        setInvoicesList(updated);
+        return;
+      }
+      
+      try {
+        await invoicesService.update(id, { status: newStatus, paymentMethod: method });
+        const updated = await invoicesService.getAll();
+        setInvoicesList(updated);
+        showSuccess('Succès', 'Paiement validé avec succès !');
+      } catch (e) {
+        console.error("Erreur mise à jour statut facture", e);
+        showError('Erreur', 'Impossible de valider le paiement.');
+      }
+      return;
+    }
+
     try {
       await invoicesService.update(id, { status: newStatus });
       const updated = await invoicesService.getAll();
       setInvoicesList(updated);
+      showSuccess('Succès', 'Statut mis à jour avec succès !');
     } catch (e) {
       console.error("Erreur mise à jour statut facture", e);
+      showError('Erreur', 'Impossible de mettre à jour le statut.');
     }
   };
 
@@ -635,7 +683,7 @@ export const Facturation: React.FC = () => {
                             <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('download'); }} icon={<Download size={16} />}>Télécharger</Button>
                           </>
                         ) : (
-                          <Button variant="secondary" onClick={() => alert("Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
+                          <Button variant="secondary" onClick={() => showError('Non implémenté', "Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
                         )}
                         <button 
                           onClick={() => handleEditInvoice(invoice)} 

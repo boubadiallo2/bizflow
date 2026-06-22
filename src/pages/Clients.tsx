@@ -3,6 +3,7 @@ import { Search, Phone, Mail, MapPin, X, Edit2, Trash2 } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { clientsService } from '../services/apiService';
+import { showConfirm } from '../utils/notifications';
 import './Clients.css';
 
 interface ClientItem {
@@ -66,7 +67,8 @@ export const Clients: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) {
+    const confirmed = await showConfirm("Êtes-vous sûr de vouloir supprimer ce client ?");
+    if (confirmed) {
       await clientsService.remove(id);
       const updated = await clientsService.getAll();
       setClients(updated as ClientItem[]);

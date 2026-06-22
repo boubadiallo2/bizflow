@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Truck, Phone, MapPin, Package, X, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { suppliersService } from '../services/apiService';
+import { showConfirm } from '../utils/notifications';
 import './Fournisseurs.css';
 
 interface FournisseurItem {
@@ -61,7 +62,8 @@ export const Fournisseurs: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce fournisseur ?")) {
+    const confirmed = await showConfirm("Êtes-vous sûr de vouloir supprimer ce fournisseur ?");
+    if (confirmed) {
       await suppliersService.remove(id);
       const updated = await suppliersService.getAll();
       setFournisseurs(updated as FournisseurItem[]);

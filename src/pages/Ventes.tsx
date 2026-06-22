@@ -3,6 +3,7 @@ import { Search, Columns, ArrowLeft, Plus, FileText, Receipt, Calendar, X, Trash
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { salesService, clientsService, productsService } from '../services/apiService';
+import { showError, showSuccess } from '../utils/notifications';
 import './Ventes.css';
 
 interface Sale {
@@ -115,7 +116,7 @@ export const Ventes: React.FC = () => {
   const handleCreateOrder = async () => {
     const validItems = orderItems.filter(item => item.productId && item.quantity > 0);
     if (validItems.length === 0) {
-      alert("Veuillez ajouter au moins un produit valide.");
+      showError("Action requise", "Veuillez ajouter au moins un produit valide.");
       return;
     }
     
@@ -155,7 +156,7 @@ export const Ventes: React.FC = () => {
       setNotes('');
     } catch (error) {
       console.error("Erreur création commande:", error);
-      alert("Erreur lors de la création de la commande.");
+      showError("Erreur", "Erreur lors de la création de la commande.");
     } finally {
       setIsSubmitting(false);
     }
@@ -173,9 +174,10 @@ export const Ventes: React.FC = () => {
       // Update the current modal state to reflect the new payment method
       setSelectedSale({ ...selectedSale, method: newPaymentMethod });
       setIsUpdatingPayment(false);
+      showSuccess("Succès", "Paiement mis à jour avec succès !");
     } catch (error) {
       console.error("Erreur lors de la mise à jour du paiement:", error);
-      alert("Erreur lors de la mise à jour.");
+      showError("Erreur", "Erreur lors de la mise à jour.");
     }
   };
 

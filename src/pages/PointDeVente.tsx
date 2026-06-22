@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Unlock, ShoppingBag, CreditCard, X, Lock, Trash2, Plus, Minus, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '../components/Button';
 import { productsService, salesService, settingsService } from '../services/apiService';
+import { showConfirm, showSuccess, showError } from '../utils/notifications';
 import './PointDeVente.css';
 
 interface Product {
@@ -81,7 +82,8 @@ export const PointDeVente: React.FC = () => {
   const [discountValue, setDiscountValue] = useState<string>('');
 
   const handleGenerateProducts = async () => {
-    if (!window.confirm("Voulez-vous générer des produits de démonstration basés sur votre type de commerce ?")) return;
+    const confirmed = await showConfirm("Voulez-vous générer des produits de démonstration basés sur votre type de commerce ?");
+    if (!confirmed) return;
     
     try {
       setIsGenerating(true);
@@ -134,10 +136,10 @@ export const PointDeVente: React.FC = () => {
       })));
       
       window.dispatchEvent(new Event('inventory-updated'));
-      alert("Produits générés avec succès !");
+      showSuccess("Succès", "Produits générés avec succès !");
     } catch (e) {
       console.error(e);
-      alert("Erreur lors de la génération");
+      showError("Erreur", "Erreur lors de la génération");
     } finally {
       setIsGenerating(false);
     }

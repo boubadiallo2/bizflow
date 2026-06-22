@@ -3,6 +3,7 @@ import { FileSignature, AlertCircle, Search, ArrowLeft, Plus, CheckCircle2, Tras
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { productsService, quotesService } from '../services/apiService';
+import { showConfirm, showError } from '../utils/notifications';
 import './Devis.css';
 
 interface LineItem {
@@ -109,7 +110,7 @@ export const Devis: React.FC = () => {
 
   const handleGenerateQuote = async () => {
     if (lines.length === 0 || !lines[0].productId) {
-      alert("Veuillez sélectionner au moins un produit pour générer le devis.");
+      showError("Attention", "Veuillez sélectionner au moins un produit pour générer le devis.");
       return;
     }
 
@@ -154,7 +155,8 @@ export const Devis: React.FC = () => {
   };
 
   const handleDeleteQuote = async (id: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce devis ?")) {
+    const confirmed = await showConfirm("Êtes-vous sûr de vouloir supprimer ce devis ?");
+    if (confirmed) {
       await quotesService.remove(id);
       const updated = await quotesService.getAll();
       setQuotes(updated as Quote[]);
