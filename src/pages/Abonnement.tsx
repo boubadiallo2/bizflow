@@ -14,10 +14,10 @@ export const Abonnement: React.FC = () => {
   
   // Default to Starter
   const [plan, setPlan] = useState({
-    name: 'Plan Starter',
+    name: 'Essai Gratuit',
     icon: <Sprout size={28} className="text-success" />,
     color: 'text-success',
-    freq: 'Gratuit',
+    freq: 'Gratuit (30 jours restants)',
     features: ['Jusqu\'à 20 produits', '50 clients maximum', '100 transactions/mois', '1 utilisateur', 'POS basique', 'Rapports simples']
   });
 
@@ -74,7 +74,7 @@ export const Abonnement: React.FC = () => {
             </div>
             <div>
               <h3 className="text-xl font-bold">{plan.name}</h3>
-              <p className="text-muted text-sm mt-1">{plan.name === 'Plan Starter' ? 'Pour démarrer et tester' : 'L\'expérience complète pour votre PME'}</p>
+              <p className="text-muted text-sm mt-1">{plan.name === 'Essai Gratuit' ? 'Pour démarrer et tester (30 jours)' : 'L\'expérience complète pour votre PME'}</p>
             </div>
           </div>
           <div className={`status-badge ${plan.name === 'Plan Pro' ? 'bg-primary-light text-primary' : ''}`}>
@@ -122,7 +122,7 @@ export const Abonnement: React.FC = () => {
         </div>
       </Card>
 
-      {plan.name === 'Plan Starter' && (
+      {plan.name === 'Essai Gratuit' && (
         <Card className="upgrade-card mt-6 bg-primary-light border-primary">
           <div className="flex justify-between items-center">
             <div>

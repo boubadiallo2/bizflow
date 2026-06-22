@@ -120,14 +120,14 @@ export const LandingPage: React.FC = () => {
         <p className="section-subtitle">Choisissez le plan qui correspond à la taille de votre entreprise.</p>
         
         <div className="pricing-grid">
-          {/* Starter Plan */}
+          {/* Free Trial Plan */}
           <div className="pricing-card">
             <div className="pricing-header">
-              <h3 className="pricing-title">Plan Starter</h3>
-              <div className="pricing-price">
-                Gratuit
+              <h3 className="pricing-title">Essai Gratuit</h3>
+              <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
+                0 <span>FCFA / 30 jours</span>
               </div>
-              <p className="text-muted mt-2">Pour démarrer et tester la plateforme</p>
+              <p className="text-muted mt-2">Pour tester la plateforme sans engagement</p>
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
@@ -148,19 +148,18 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
             <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
-              Commencer gratuitement
+              Commencer l'essai
             </Link>
           </div>
 
-          {/* Pro Plan */}
-          <div className="pricing-card popular">
-            <div className="popular-badge">Le plus populaire</div>
+          {/* Monthly Plan */}
+          <div className="pricing-card">
             <div className="pricing-header">
-              <h3 className="pricing-title">Plan Pro</h3>
-              <div className="pricing-price">
+              <h3 className="pricing-title">Plan Mensuel</h3>
+              <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
                 15 000 <span>FCFA / mois</span>
               </div>
-              <p className="text-muted mt-2">Pour les entreprises en croissance</p>
+              <p className="text-muted mt-2">Pour une flexibilité totale</p>
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
@@ -177,11 +176,44 @@ export const LandingPage: React.FC = () => {
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Export PDF & Rapports avancés</span>
+                <span>Export PDF & Rapports</span>
               </div>
             </div>
             <Link to="/register" className="btn-hero btn-hero-primary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
-              Passer au plan Pro
+              S'abonner
+            </Link>
+          </div>
+
+          {/* Annual Plan */}
+          <div className="pricing-card popular">
+            <div className="popular-badge">Le plus avantageux (-2 mois)</div>
+            <div className="pricing-header">
+              <h3 className="pricing-title">Plan Annuel</h3>
+              <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
+                150 000 <span>FCFA / an</span>
+              </div>
+              <p className="text-muted mt-2">Pour les entreprises établies</p>
+            </div>
+            <div className="pricing-features">
+              <div className="pricing-feature">
+                <CheckCircle2 size={20} className="pricing-feature-icon" />
+                <span>Toutes les fonctionnalités Pro</span>
+              </div>
+              <div className="pricing-feature">
+                <CheckCircle2 size={20} className="pricing-feature-icon" />
+                <span>Utilisateurs illimités</span>
+              </div>
+              <div className="pricing-feature">
+                <CheckCircle2 size={20} className="pricing-feature-icon" />
+                <span>Transactions illimitées</span>
+              </div>
+              <div className="pricing-feature">
+                <CheckCircle2 size={20} className="pricing-feature-icon" />
+                <span>Assistance prioritaire 24/7</span>
+              </div>
+            </div>
+            <Link to="/register" className="btn-hero btn-hero-primary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
+              S'abonner
             </Link>
           </div>
         </div>
