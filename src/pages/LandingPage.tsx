@@ -120,63 +120,60 @@ export const LandingPage: React.FC = () => {
         <p className="section-subtitle">Choisissez le plan qui correspond à la taille de votre entreprise.</p>
         
         <div className="pricing-grid">
-          {/* Free Trial Plan */}
+          {/* Starter Plan */}
           <div className="pricing-card">
             <div className="pricing-header">
-              <h3 className="pricing-title">Essai Gratuit</h3>
+              <h3 className="pricing-title">Starter</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                0 <span>FCFA / 30 jours</span>
+                5 000 <span>FCFA / mois</span>
               </div>
-              <p className="text-muted mt-2">Pour tester la plateforme sans engagement</p>
+              <p className="text-muted mt-2">Pour les petites boutiques</p>
             </div>
             <div className="pricing-features">
-              <div className="pricing-feature">
-                <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Jusqu'à 20 produits</span>
-              </div>
-              <div className="pricing-feature">
-                <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>50 clients maximum</span>
-              </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
                 <span>1 utilisateur</span>
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>100 transactions/mois</span>
+                <span>100 produits</span>
+              </div>
+              <div className="pricing-feature">
+                <CheckCircle2 size={20} className="pricing-feature-icon" />
+                <span>500 transactions/mois</span>
               </div>
             </div>
             <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
-              Commencer l'essai
+              Commencer
             </Link>
           </div>
 
-          {/* Monthly Plan */}
-          <div className="pricing-card">
+          {/* Business Plan */}
+          <div className="pricing-card popular">
+            <div className="popular-badge">Recommandé</div>
             <div className="pricing-header">
-              <h3 className="pricing-title">Plan Mensuel</h3>
+              <h3 className="pricing-title">Business</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
                 15 000 <span>FCFA / mois</span>
               </div>
-              <p className="text-muted mt-2">Pour une flexibilité totale</p>
+              <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou 120 000 FCFA / an (4 mois gratuits)</p>
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Produits et clients illimités</span>
+                <span>5 utilisateurs</span>
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Jusqu'à 5 utilisateurs</span>
+                <span>Produits illimités</span>
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Jusqu'à 5 000 transactions/mois</span>
+                <span>Rapports avancés</span>
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Export PDF & Rapports</span>
+                <span>Export PDF & Devis</span>
               </div>
             </div>
             <Link to="/register" className="btn-hero btn-hero-primary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
@@ -184,37 +181,60 @@ export const LandingPage: React.FC = () => {
             </Link>
           </div>
 
-          {/* Annual Plan */}
-          <div className="pricing-card popular">
-            <div className="popular-badge">Le plus avantageux (-2 mois)</div>
+          {/* Enterprise Plan */}
+          <div className="pricing-card">
             <div className="pricing-header">
-              <h3 className="pricing-title">Plan Annuel</h3>
+              <h3 className="pricing-title">Enterprise</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                150 000 <span>FCFA / an</span>
+                30 000 <span>FCFA / mois</span>
               </div>
-              <p className="text-muted mt-2">Pour les entreprises établies</p>
+              <p className="text-muted mt-2">Pour les grandes entreprises</p>
             </div>
             <div className="pricing-features">
-              <div className="pricing-feature">
-                <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Toutes les fonctionnalités Pro</span>
-              </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
                 <span>Utilisateurs illimités</span>
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Transactions illimitées</span>
+                <span>Multi-boutiques</span>
               </div>
               <div className="pricing-feature">
                 <CheckCircle2 size={20} className="pricing-feature-icon" />
-                <span>Assistance prioritaire 24/7</span>
+                <span>Support prioritaire</span>
+              </div>
+              <div className="pricing-feature">
+                <CheckCircle2 size={20} className="pricing-feature-icon" />
+                <span>Accès API</span>
               </div>
             </div>
-            <Link to="/register" className="btn-hero btn-hero-primary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
-              S'abonner
+            <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
+              Nous contacter
             </Link>
+          </div>
+        </div>
+
+        {/* Moyens de paiement */}
+        <div style={{ marginTop: '4rem', textAlign: 'center' }}>
+          <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontWeight: 500 }}>
+            Moyens de paiement acceptés et sécurisés
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            <div style={{ backgroundColor: '#13B1E6', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+              Wave
+            </div>
+            <div style={{ backgroundColor: '#FF6600', color: 'black', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+              Orange Money
+            </div>
+            <div style={{ backgroundColor: '#E2001A', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+              Free Money
+            </div>
+            <div style={{ backgroundColor: '#1A1F71', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center', fontStyle: 'italic' }}>
+              VISA
+            </div>
+            <div style={{ backgroundColor: '#21125E', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#EB001B', marginRight: '4px' }}>●</span><span style={{ color: '#F79E1B' }}>●</span> Mastercard
+            </div>
           </div>
         </div>
       </section>

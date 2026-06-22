@@ -31,9 +31,9 @@ export const Abonnement: React.FC = () => {
             sector: data.commerceType || 'Secteur non défini'
           });
         }
-        if (data?.subscription === 'Pro') {
+        if (data?.subscription === 'Business') {
           setPlan({
-            name: 'Plan Pro',
+            name: 'Plan Business',
             icon: <Rocket size={28} className="text-primary" />,
             color: 'text-primary',
             freq: 'Payé',
@@ -49,9 +49,9 @@ export const Abonnement: React.FC = () => {
 
   const handlePayment = async () => {
     // Simulate payment and save to Firebase
-    await settingsService.save({ subscription: 'Pro' });
+    await settingsService.save({ subscription: 'Business' });
     setPlan({
-      name: 'Plan Pro',
+      name: 'Plan Business',
       icon: <Rocket size={28} className="text-primary" />,
       color: 'text-primary',
       freq: billingCycle === 'annual' ? 'Annuel (Payé)' : 'Mensuel (Payé)',
@@ -77,7 +77,7 @@ export const Abonnement: React.FC = () => {
               <p className="text-muted text-sm mt-1">{plan.name === 'Essai Gratuit' ? 'Pour démarrer et tester (30 jours)' : 'L\'expérience complète pour votre PME'}</p>
             </div>
           </div>
-          <div className={`status-badge ${plan.name === 'Plan Pro' ? 'bg-primary-light text-primary' : ''}`}>
+          <div className={`status-badge ${plan.name === 'Plan Business' ? 'bg-primary-light text-primary' : ''}`}>
             <Check size={14} /> Actif
           </div>
         </div>
@@ -126,9 +126,9 @@ export const Abonnement: React.FC = () => {
         <Card className="upgrade-card mt-6 bg-primary-light border-primary">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-semibold text-primary mb-1">Passez au plan Pro</h4>
+              <h4 className="font-semibold text-primary mb-1">Passez au plan Business</h4>
               <p className="text-sm text-muted">
-                Débloquez l'export PDF, les rapports avancés et jusqu'à 5 000 transactions/mois.
+                Débloquez l'export PDF, les rapports avancés et les transactions illimitées.
               </p>
             </div>
             <Button variant="primary" onClick={() => setIsUpgradeModalOpen(true)}>Upgrader → 15 000 FCFA/mois</Button>
@@ -158,9 +158,9 @@ export const Abonnement: React.FC = () => {
                   onClick={() => setBillingCycle('annual')}
                   style={{ flex: 1, padding: '16px', border: `2px solid ${billingCycle === 'annual' ? 'var(--color-primary)' : 'var(--color-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer', textAlign: 'center', backgroundColor: billingCycle === 'annual' ? 'var(--color-primary-light)' : 'transparent', position: 'relative' }}
                 >
-                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', backgroundColor: 'var(--color-danger)', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>-2 mois !</div>
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', backgroundColor: 'var(--color-danger)', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>-4 mois !</div>
                   <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Annuel</div>
-                  <div style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>150 000 F</div>
+                  <div style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '1.2rem' }}>120 000 F</div>
                 </div>
               </div>
 
@@ -193,7 +193,7 @@ export const Abonnement: React.FC = () => {
             <div className="modal-footer" style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
               <Button variant="secondary" onClick={() => setIsUpgradeModalOpen(false)} style={{ flex: 1 }}>Annuler</Button>
               <Button variant="primary" onClick={handlePayment} style={{ flex: 1, display: 'flex', justifyContent: 'center' }} icon={<CreditCard size={18}/>}>
-                Payer {billingCycle === 'monthly' ? '15 000 F' : '150 000 F'}
+                Payer {billingCycle === 'monthly' ? '15 000 F' : '120 000 F'}
               </Button>
             </div>
           </div>
@@ -206,7 +206,7 @@ export const Abonnement: React.FC = () => {
           <CheckCircle size={20} style={{ color: 'var(--color-success)', marginTop: '2px' }} />
           <div>
             <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: 'var(--color-text)' }}>Paiement réussi</h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Votre abonnement Pro est maintenant actif !</p>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Votre abonnement Business est maintenant actif !</p>
           </div>
         </div>
       )}
