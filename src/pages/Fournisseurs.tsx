@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Truck, Phone, MapPin, Package, X, Edit2, Trash2 } from 'lucide-react';
+import { Search, Truck, Phone, MapPin, Package, X, Edit2, Trash2, ShoppingCart } from 'lucide-react';
 import { Button } from '../components/Button';
-import { suppliersService } from '../services/apiService';
-import { showConfirm } from '../utils/notifications';
+import { suppliersService, productsService } from '../services/apiService';
+import { showConfirm, showSuccess, showError } from '../utils/notifications';
 import './Fournisseurs.css';
 
 interface FournisseurItem {
@@ -27,6 +27,12 @@ export const Fournisseurs: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', location: '', products: '' });
   const [, setLoading] = useState(true);
 
+  // Achats state
+  const [inventoryProducts, setInventoryProducts] = useState<any[]>([]);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [selectedSupplierForPurchase, setSelectedSupplierForPurchase] = useState<FournisseurItem | null>(null);
+  const [purchaseData, setPurchaseData] = useState({ productId: '', quantity: 1, unitCost: 0 });
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -40,6 +46,9 @@ export const Fournisseurs: React.FC = () => {
         } else {
           setFournisseurs(data as FournisseurItem[]);
         }
+
+        const inv = await productsService.getAll();
+        setInventoryProducts(inv);
       } catch (error) {
         console.error('Erreur chargement fournisseurs:', error);
       } finally {
@@ -80,6 +89,35 @@ export const Fournisseurs: React.FC = () => {
     const updated = await suppliersService.getAll();
     setFournisseurs(updated as FournisseurItem[]);
     setIsModalOpen(false);
+  };
+
+  const openPurchaseModal = (f: FournisseurItem) => {
+    setSelectedSupplierForPurchase(f);
+    setPurchaseData({ productId: '', quantity: 1, unitCost: 0 });
+    setIsPurchaseModalOpen(true);
+  };
+
+  const handlePurchaseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!purchaseData.productId) {
+      showError("Veuillez sélectionner un produit", "Validation");
+      return;
+    }
+    try {
+      const product = inventoryProducts.find(p => p.id.toString() === purchaseData.productId);
+      if (product) {
+        const newStock = (product.stock || 0) + Number(purchaseData.quantity);
+        await productsService.update(product.id, { ...product, stock: newStock });
+        showSuccess(`Achat de ${purchaseData.quantity} ${product.name} enregistré !`);
+        setIsPurchaseModalOpen(false);
+        // Refresh inventory
+        const inv = await productsService.getAll();
+        setInventoryProducts(inv);
+      }
+    } catch (e) {
+      console.error("Erreur enregistrement achat", e);
+      showError("Une erreur s'est produite lors de l'enregistrement de l'achat");
+    }
   };
 
   const filteredFournisseurs = useMemo(() => {
@@ -124,6 +162,9 @@ export const Fournisseurs: React.FC = () => {
           filteredFournisseurs.map((fournisseur) => (
             <div key={fournisseur.id} className="fournisseur-card">
               <div className="fournisseur-card-actions">
+                <button className="fournisseur-action-btn" title="Enregistrer un achat" onClick={() => openPurchaseModal(fournisseur)} style={{ color: 'var(--color-primary)' }}>
+                  <ShoppingCart size={16} />
+                </button>
                 <button className="fournisseur-action-btn" title="Modifier" onClick={() => handleEditClick(fournisseur)}>
                   <Edit2 size={16} />
                 </button>
@@ -201,6 +242,65 @@ export const Fournisseurs: React.FC = () => {
               <div className="modal-footer">
                 <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)} style={{ border: '1px solid var(--color-border)', backgroundColor: 'transparent' }}>Annuler</Button>
                 <Button type="submit" variant="primary">{editingId ? 'Enregistrer' : 'Créer'}</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isPurchaseModalOpen && selectedSupplierForPurchase && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Enregistrer un achat</h3>
+              <button className="close-btn" onClick={() => setIsPurchaseModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handlePurchaseSubmit}>
+              <div className="modal-body">
+                <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', fontSize: '0.9rem' }}>
+                  <strong>Fournisseur :</strong> {selectedSupplierForPurchase.name}
+                </div>
+                <div className="form-group">
+                  <label>Produit (Inventaire) *</label>
+                  <select 
+                    className="form-input" 
+                    required 
+                    value={purchaseData.productId} 
+                    onChange={e => setPurchaseData({...purchaseData, productId: e.target.value})}
+                  >
+                    <option value="" disabled>Sélectionnez un produit</option>
+                    {inventoryProducts.map((p: any) => (
+                      <option key={p.id} value={p.id}>{p.name} (Stock actuel: {p.stock || 0})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Quantité achetée *</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    className="form-input" 
+                    required
+                    value={purchaseData.quantity}
+                    onChange={e => setPurchaseData({...purchaseData, quantity: Number(e.target.value)})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Coût unitaire d'achat (Optionnel)</label>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    className="form-input" 
+                    value={purchaseData.unitCost}
+                    onChange={e => setPurchaseData({...purchaseData, unitCost: Number(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <Button type="button" variant="secondary" onClick={() => setIsPurchaseModalOpen(false)}>Annuler</Button>
+                <Button type="submit" variant="primary">Valider l'achat</Button>
               </div>
             </form>
           </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingCart, FileText, Banknote, AlertTriangle } from 'lucide-react';
 import { Card } from '../components/Card';
 
-import { productsService, salesService } from '../services/apiService';
+import { productsService, salesService, invoicesService } from '../services/apiService';
 import './Dashboard.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -12,6 +12,7 @@ export const Dashboard: React.FC = () => {
   const [stockAlertsCount, setStockAlertsCount] = useState(0);
   const [topAlerts, setTopAlerts] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
+  const [unpaidInvoicesCount, setUnpaidInvoicesCount] = useState(0);
 
   useEffect(() => {
     const loadData = async () => {
@@ -23,10 +24,19 @@ export const Dashboard: React.FC = () => {
         console.error('Erreur chargement ventes:', e);
       }
     
+      // Load Invoices
+      let invoices: any[] = [];
+      try {
+        invoices = await invoicesService.getAll();
+      } catch (e) {
+        console.error('Erreur chargement factures:', e);
+      }
+
       const todayStr = new Date().toISOString().split('T')[0];
     
       let ca = 0;
       let orders = 0;
+      let unpaidCount = 0;
       const dailyStats: Record<string, number> = {};
     
       // Initialize last 7 days for the chart
@@ -37,6 +47,7 @@ export const Dashboard: React.FC = () => {
           dailyStats[dayStr] = 0;
       }
     
+      // Add sales to stats
       sales.forEach((s: any) => {
           const saleDate = s.date.split('T')[0];
           if (saleDate === todayStr) {
@@ -47,6 +58,26 @@ export const Dashboard: React.FC = () => {
               dailyStats[saleDate] += s.amount;
           }
       });
+
+      // Add paid invoices to stats, count unpaid
+      invoices.forEach((inv: any) => {
+          if (inv.status !== 'Payée') {
+              unpaidCount++;
+          } else {
+              // Si la facture est payée, on l'ajoute au CA (en supposant createdAt ou date pour la date)
+              const invDate = (inv.createdAt || inv.date || new Date().toISOString()).split('T')[0];
+              if (invDate === todayStr) {
+                  ca += inv.totalTTC || inv.amount || 0;
+              }
+              if (dailyStats[invDate] !== undefined) {
+                  dailyStats[invDate] += inv.totalTTC || inv.amount || 0;
+              }
+          }
+      });
+    
+      setTodayCA(ca);
+      setTodayOrders(orders);
+      setUnpaidInvoicesCount(unpaidCount);
     
       setTodayCA(ca);
       setTodayOrders(orders);
@@ -127,7 +158,7 @@ export const Dashboard: React.FC = () => {
               <FileText size={18} />
             </div>
           </div>
-          <div className="stat-value">0</div>
+          <div className="stat-value">{unpaidInvoicesCount}</div>
         </Card>
 
         <Card className="stat-card bg-danger-light border-danger">

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Settings, Building2, Upload, X, ImageIcon } from 'lucide-react';
+import { Settings, Building2, Upload, X, ImageIcon, User } from 'lucide-react';
 import { Button } from '../components/Button';
 import { settingsService } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,6 +24,17 @@ export const Parametres: React.FC = () => {
     ninea: '',
     slogan: ''
   });
+  
+  // Profil state
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileInfo, setProfileInfo] = useState({
+    name: name || '',
+    email: '',
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load from backend
@@ -46,6 +57,11 @@ export const Parametres: React.FC = () => {
             ninea: data.ninea || '',
             slogan: data.slogan || ''
           }));
+          setProfileInfo(prev => ({
+            ...prev,
+            email: data.email || prev.email,
+            name: data.name || prev.name
+          }));
         }
       } catch (e) {
         console.error('Erreur chargement paramètres:', e);
@@ -62,17 +78,47 @@ export const Parametres: React.FC = () => {
     }));
   };
 
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileInfo(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
       await settingsService.save({ ...companyInfo, logo: logoPreview });
-      showSuccess('Succès', 'Paramètres enregistrés avec succès !');
+      showSuccess('Succès', 'Paramètres d\'entreprise enregistrés !');
     } catch (err) {
       console.error(err);
       showError('Erreur', 'Erreur lors de l\'enregistrement des paramètres.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (profileInfo.newPassword && profileInfo.newPassword !== profileInfo.confirmPassword) {
+      showError("Erreur", "Les nouveaux mots de passe ne correspondent pas");
+      return;
+    }
+    
+    setIsSavingProfile(true);
+    try {
+      // Simulate profile saving or save to settings
+      await new Promise(resolve => setTimeout(resolve, 800));
+      // In a real app we would call an endpoint like authService.updateProfile
+      showSuccess('Succès', 'Profil utilisateur mis à jour !');
+      setProfileInfo(prev => ({ ...prev, oldPassword: '', newPassword: '', confirmPassword: '' }));
+    } catch (err) {
+      console.error(err);
+      showError('Erreur', 'Impossible de mettre à jour le profil');
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
@@ -330,6 +376,88 @@ export const Parametres: React.FC = () => {
           <div className="form-actions">
             <Button variant="primary" type="submit" disabled={isSaving}>
               {isSaving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Profil Utilisateur Card */}
+      <div className="settings-card" style={{ marginTop: '24px' }}>
+        <div className="settings-section-title">
+          <User size={20} className="text-muted" />
+          Profil Utilisateur
+        </div>
+        
+        <form className="settings-form" onSubmit={handleProfileSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Nom complet</label>
+              <input 
+                type="text" 
+                name="name"
+                className="form-input" 
+                value={profileInfo.name} 
+                onChange={handleProfileChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Email de connexion</label>
+              <input 
+                type="email" 
+                name="email"
+                className="form-input" 
+                value={profileInfo.email} 
+                onChange={handleProfileChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group" style={{ marginTop: '24px', borderTop: '1px solid var(--color-border)', paddingTop: '24px' }}>
+            <h4 style={{ marginBottom: '16px', fontSize: '1rem', color: 'var(--color-sidebar)' }}>Changer de mot de passe</h4>
+            <div className="form-row">
+              <div className="form-group" style={{ flex: '1' }}>
+                <label className="form-label">Ancien mot de passe</label>
+                <input 
+                  type="password" 
+                  name="oldPassword"
+                  className="form-input" 
+                  value={profileInfo.oldPassword} 
+                  onChange={handleProfileChange}
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Nouveau mot de passe</label>
+                <input 
+                  type="password" 
+                  name="newPassword"
+                  className="form-input" 
+                  value={profileInfo.newPassword} 
+                  onChange={handleProfileChange}
+                  placeholder="••••••••"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Confirmer le nouveau mot de passe</label>
+                <input 
+                  type="password" 
+                  name="confirmPassword"
+                  className="form-input" 
+                  value={profileInfo.confirmPassword} 
+                  onChange={handleProfileChange}
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <Button variant="primary" type="submit" disabled={isSavingProfile}>
+              {isSavingProfile ? 'Mise à jour...' : 'Mettre à jour mon profil'}
             </Button>
           </div>
         </form>

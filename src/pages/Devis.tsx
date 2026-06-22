@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { FileSignature, AlertCircle, Search, ArrowLeft, Plus, CheckCircle2, Trash2, Edit2, Printer } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { productsService, quotesService } from '../services/apiService';
+import { productsService, quotesService, settingsService } from '../services/apiService';
 import { showConfirm, showError } from '../utils/notifications';
+import html2pdf from 'html2pdf.js';
 import './Devis.css';
 
 interface LineItem {
@@ -41,10 +42,16 @@ export const Devis: React.FC = () => {
   ]);
   const [applyTva, setApplyTva] = useState(true);
 
+  const [companySettings, setCompanySettings] = useState<any>(null);
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const inv = await productsService.getAll();
+        const [inv, q, settingsData] = await Promise.all([
+          productsService.getAll(),
+          quotesService.getAll(),
+          settingsService.get()
+        ]);
         if (inv.length > 0) {
           setInventoryProducts(inv);
         } else {
@@ -53,13 +60,8 @@ export const Devis: React.FC = () => {
             { id: '2', name: 'Jean slim pour homme', priceValue: 15000 }
           ]);
         }
-      } catch (e) {
-        setInventoryProducts([]);
-      }
-
-      try {
-        const q = await quotesService.getAll();
         setQuotes(q as Quote[]);
+        if (settingsData) setCompanySettings(settingsData);
       } catch (e) {
         console.error('Erreur chargement devis:', e);
       }
@@ -166,8 +168,18 @@ export const Devis: React.FC = () => {
   const handlePrintQuote = (quote: Quote) => {
     setViewingQuote(quote);
     setTimeout(() => {
-      window.print();
-    }, 100);
+      const element = document.getElementById('devis-pdf-content');
+      if (element) {
+        const opt = {
+          margin:       0,
+          filename:     `Devis_${quote.id.slice(0, 8)}.pdf`,
+          image:        { type: 'jpeg' as const, quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' as const }
+        };
+        html2pdf().set(opt).from(element).save();
+      }
+    }, 500);
   };
 
   const formatCurrency = (amount: number) => {
@@ -189,19 +201,22 @@ export const Devis: React.FC = () => {
       <div className="print-view-container">
         <div className="no-print" style={{ marginBottom: '24px', display: 'flex', gap: '16px' }}>
           <Button variant="secondary" onClick={() => setViewingQuote(null)} icon={<ArrowLeft size={18} />}>Retour</Button>
-          <Button variant="primary" onClick={() => window.print()} icon={<Printer size={18} />}>Imprimer / Enregistrer PDF</Button>
+          <Button variant="primary" onClick={() => handlePrintQuote(viewingQuote)} icon={<Printer size={18} />}>Télécharger PDF</Button>
         </div>
         
-        <div className="quote-document">
+        <div id="devis-pdf-content" className="quote-document" style={{ padding: '20px', backgroundColor: 'white', color: 'black' }}>
           <div className="quote-header">
             <div className="company-details">
-              <h1>BizFlow ERP</h1>
-              <p>123 Avenue du Commerce</p>
-              <p>Dakar, Sénégal</p>
-              <p>Tél: +221 77 123 45 67</p>
+              {companySettings?.logo ? (
+                <img src={companySettings.logo} alt="Logo" style={{ maxHeight: '80px', marginBottom: '10px' }} />
+              ) : (
+                <h1 style={{ margin: 0 }}>{companySettings?.name || 'BizFlow ERP'}</h1>
+              )}
+              <p>{companySettings?.address || '123 Avenue du Commerce'}</p>
+              <p>{companySettings?.phone || 'Tél: +221 77 123 45 67'}</p>
             </div>
             <div className="quote-meta">
-              <h2>DEVIS</h2>
+              <h2 style={{ fontSize: '28px', color: 'var(--color-sidebar)', margin: '0 0 10px 0' }}>DEVIS</h2>
               <p><strong>N° :</strong> {viewingQuote.id}</p>
               <p><strong>Date :</strong> {new Date(viewingQuote.createdAt).toLocaleDateString('fr-FR')}</p>
               <p><strong>Validité :</strong> {new Date(viewingQuote.date).toLocaleDateString('fr-FR')}</p>

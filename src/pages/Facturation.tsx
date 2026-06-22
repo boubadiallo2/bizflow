@@ -199,7 +199,7 @@ export const Facturation: React.FC = () => {
     }
   }, [viewingInvoice, autoAction]);
 
-  if (viewingInvoice && commerceType === 'Optique / Lunetterie') {
+  if (viewingInvoice) {
     const optic = viewingInvoice.opticData || {};
     const subtotal = viewingInvoice.amount || viewingInvoice.totalTTC;
     
@@ -230,85 +230,143 @@ export const Facturation: React.FC = () => {
             {companySettings?.logo ? (
               <img src={companySettings.logo} alt="Logo" style={{ maxHeight: '100px' }} />
             ) : (
-              <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 'bold' }}>{companySettings?.name}</h1>
+              <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 'bold' }}>{companySettings?.name || 'Mon Entreprise'}</h1>
             )}
           </div>
           
-          <div style={{ backgroundColor: '#00a3e0', color: 'white', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: '18px', marginBottom: '20px' }}>
-            Vente de lunettes Médicales - Lunettes Photogray Antireflet - Lunettes de Soleil
-          </div>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-            <div style={{ backgroundColor: '#00a3e0', color: 'white', padding: '5px 15px', fontWeight: 'bold', fontSize: '20px' }}>
-              FACTURE
-            </div>
-            <div style={{ fontSize: '16px' }}>
-              Date : <span style={{ borderBottom: '1px dotted #00a3e0', display: 'inline-block', width: '150px', textAlign: 'center', color: 'black' }}>{new Date(viewingInvoice.date).toLocaleDateString('fr-FR')}</span>
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', marginBottom: '20px', fontSize: '16px', lineHeight: '1.5' }}>
-            <div style={{ flex: 1, display: 'flex' }}>
-              <span style={{ whiteSpace: 'nowrap' }}>M.</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, marginLeft: '10px' }}></span>
-            </div>
-            <div style={{ flex: 1, display: 'flex', marginLeft: '20px' }}>
-              <span style={{ whiteSpace: 'nowrap' }}>Tél :</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, marginLeft: '10px' }}></span>
-            </div>
-          </div>
-          
-          <div style={{ fontSize: '16px', lineHeight: '2' }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
-                {optic.monture && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+          {commerceType === 'Optique / Lunetterie' ? (
+            <>
+              <div style={{ backgroundColor: '#00a3e0', color: 'white', padding: '10px', textAlign: 'center', fontWeight: 'bold', fontSize: '18px', marginBottom: '20px' }}>
+                Vente de lunettes Médicales - Lunettes Photogray Antireflet - Lunettes de Soleil
               </div>
-              <span style={{ width: '80px' }}>Monture</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1 }}></span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
-                {optic.verre && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                <div style={{ backgroundColor: '#00a3e0', color: 'white', padding: '5px 15px', fontWeight: 'bold', fontSize: '20px' }}>
+                  FACTURE
+                </div>
+                <div style={{ fontSize: '16px' }}>
+                  Date : <span style={{ borderBottom: '1px dotted #00a3e0', display: 'inline-block', width: '150px', textAlign: 'center', color: 'black' }}>{new Date(viewingInvoice.date).toLocaleDateString('fr-FR')}</span>
+                </div>
               </div>
-              <span style={{ width: '80px' }}>Verre</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1 }}></span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ width: '110px', paddingLeft: '30px' }}>OD</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.od}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ width: '110px', paddingLeft: '30px' }}>OG</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.og}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-              <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
-                {optic.add && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+              
+              <div style={{ display: 'flex', marginBottom: '20px', fontSize: '16px', lineHeight: '1.5' }}>
+                <div style={{ flex: 1, display: 'flex' }}>
+                  <span style={{ whiteSpace: 'nowrap' }}>M.</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, marginLeft: '10px' }}>{viewingInvoice.clientName || viewingInvoice.client}</span>
+                </div>
+                <div style={{ flex: 1, display: 'flex', marginLeft: '20px' }}>
+                  <span style={{ whiteSpace: 'nowrap' }}>Tél :</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, marginLeft: '10px' }}></span>
+                </div>
               </div>
-              <span style={{ width: '120px' }}>Progressif ADD</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.add && optic.add !== 'Oui' ? optic.add : ''}</span>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ width: '140px', paddingLeft: '30px' }}>TOTAL</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{subtotal.toLocaleString('fr-FR')} F</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ width: '140px', paddingLeft: '30px' }}>REMISE</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}></span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ width: '140px', paddingLeft: '30px' }}>TOTAL GENERAL</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{subtotal.toLocaleString('fr-FR')} F</span>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #00a3e0', paddingBottom: '20px' }}>
-              <span style={{ width: '140px', paddingLeft: '30px' }}>AVANCE</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{(optic.avance || 0).toLocaleString('fr-FR')} F</span>
-              <span style={{ width: '80px', paddingLeft: '20px' }}>RESTE</span>
-              <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{(optic.reste || 0).toLocaleString('fr-FR')} F</span>
-            </div>
-          </div>
+              
+              <div style={{ fontSize: '16px', lineHeight: '2' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
+                    {optic.monture && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+                  </div>
+                  <span style={{ width: '80px' }}>Monture</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1 }}></span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
+                    {optic.verre && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+                  </div>
+                  <span style={{ width: '80px' }}>Verre</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1 }}></span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ width: '110px', paddingLeft: '30px' }}>OD</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.od}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ width: '110px', paddingLeft: '30px' }}>OG</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.og}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                  <div style={{ width: '20px', height: '20px', border: '2px solid #00a3e0', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '10px' }}>
+                    {optic.add && <span style={{ fontSize: '18px', lineHeight: '1' }}>✓</span>}
+                  </div>
+                  <span style={{ width: '120px' }}>Progressif ADD</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{optic.add && optic.add !== 'Oui' ? optic.add : ''}</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ width: '140px', paddingLeft: '30px' }}>TOTAL</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{subtotal.toLocaleString('fr-FR')} F</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ width: '140px', paddingLeft: '30px' }}>REMISE</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}></span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ width: '140px', paddingLeft: '30px' }}>TOTAL GENERAL</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{subtotal.toLocaleString('fr-FR')} F</span>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #00a3e0', paddingBottom: '20px' }}>
+                  <span style={{ width: '140px', paddingLeft: '30px' }}>AVANCE</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{(optic.avance || 0).toLocaleString('fr-FR')} F</span>
+                  <span style={{ width: '80px', paddingLeft: '20px' }}>RESTE</span>
+                  <span style={{ borderBottom: '1px dotted #00a3e0', flex: 1, paddingLeft: '10px', color: 'black' }}>{(optic.reste || 0).toLocaleString('fr-FR')} F</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '40px' }}>
+                <div>
+                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: 'var(--color-sidebar)' }}>FACTURE</h2>
+                  <p style={{ margin: '5px 0', color: 'var(--color-text-muted)' }}>N° {viewingInvoice.invoiceNumber || viewingInvoice.id?.slice(0,8)}</p>
+                  <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>Date: {new Date(viewingInvoice.date).toLocaleDateString('fr-FR')}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <h3 style={{ margin: '0 0 10px 0', color: 'var(--color-text)' }}>Client</h3>
+                  <p style={{ margin: 0, fontWeight: 'bold', fontSize: '18px' }}>{viewingInvoice.clientName || viewingInvoice.client}</p>
+                </div>
+              </div>
+              
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '40px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                    <th style={{ padding: '12px 0', textAlign: 'left' }}>Description</th>
+                    <th style={{ padding: '12px 0', textAlign: 'center' }}>Qté</th>
+                    <th style={{ padding: '12px 0', textAlign: 'right' }}>Prix Unitaire</th>
+                    <th style={{ padding: '12px 0', textAlign: 'right' }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(viewingInvoice.lines || viewingInvoice.items || []).map((line: any, idx: number) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '16px 0', color: 'var(--color-text)' }}>{line.productName || line.product}</td>
+                      <td style={{ padding: '16px 0', textAlign: 'center', color: 'var(--color-text-muted)' }}>{line.quantity}</td>
+                      <td style={{ padding: '16px 0', textAlign: 'right', color: 'var(--color-text-muted)' }}>{line.unitPrice.toLocaleString('fr-FR')} F</td>
+                      <td style={{ padding: '16px 0', textAlign: 'right', fontWeight: 'bold', color: 'var(--color-text)' }}>{(line.quantity * line.unitPrice).toLocaleString('fr-FR')} F</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
+                <div style={{ width: '300px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                    <span style={{ color: 'var(--color-text-muted)' }}>Total HT</span>
+                    <span style={{ fontWeight: 'bold' }}>{subtotal.toLocaleString('fr-FR')} F</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                    <span style={{ color: 'var(--color-text-muted)' }}>TVA (18%)</span>
+                    <span style={{ fontWeight: 'bold' }}>0 F</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '15px 0', marginTop: '10px', borderTop: '2px solid var(--color-sidebar)', fontSize: '20px' }}>
+                    <span style={{ fontWeight: 'bold', color: 'var(--color-sidebar)' }}>Total TTC</span>
+                    <span style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{subtotal.toLocaleString('fr-FR')} F</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          
+
           
           <div style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.4' }}>
             <p style={{ margin: '0' }}>RCCM : {companySettings?.rccm || '...................'} - NINEA : {companySettings?.ninea || '...................'}</p>
@@ -678,13 +736,7 @@ export const Facturation: React.FC = () => {
                     </td>
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        {commerceType === 'Optique / Lunetterie' ? (
-                          <>
-                            <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('download'); }} icon={<Download size={16} />}>Télécharger</Button>
-                          </>
-                        ) : (
-                          <Button variant="secondary" onClick={() => showError('Non implémenté', "Impression standard non implémentée")} icon={<FileText size={16} />}>Détails</Button>
-                        )}
+                        <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('download'); }} icon={<Download size={16} />}>Télécharger</Button>
                         <button 
                           onClick={() => handleEditInvoice(invoice)} 
                           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px' }} 
