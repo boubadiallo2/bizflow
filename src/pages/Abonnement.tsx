@@ -10,6 +10,7 @@ export const Abonnement: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [paymentMethod, setPaymentMethod] = useState('Wave');
   const [showToast, setShowToast] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState({ name: 'Chargement...', sector: 'Chargement...' });
   
   // Default to Starter
   const [plan, setPlan] = useState({
@@ -24,6 +25,12 @@ export const Abonnement: React.FC = () => {
     const loadSubscription = async () => {
       try {
         const data = await settingsService.get();
+        if (data) {
+          setCompanyInfo({
+            name: data.name || 'Entreprise',
+            sector: data.commerceType || 'Secteur non défini'
+          });
+        }
         if (data?.subscription === 'Pro') {
           setPlan({
             name: 'Plan Pro',
@@ -80,13 +87,13 @@ export const Abonnement: React.FC = () => {
             <span className="info-label text-muted text-sm flex items-center gap-1">
               <Building2 size={14} /> Entreprise
             </span>
-            <span className="info-value font-semibold">Amadou Lamine</span>
+            <span className="info-value font-semibold">{companyInfo.name}</span>
           </div>
           <div className="info-item">
             <span className="info-label text-muted text-sm flex items-center gap-1">
               <Briefcase size={14} /> Secteur
             </span>
-            <span className="info-value font-semibold">Autre activité</span>
+            <span className="info-value font-semibold">{companyInfo.sector}</span>
           </div>
           <div className="info-item">
             <span className="info-label text-muted text-sm flex items-center gap-1">
