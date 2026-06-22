@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingCart, FileText, Banknote, AlertTriangle } from 'lucide-react';
 import { Card } from '../components/Card';
 
-import { productsService, salesService, invoicesService } from '../services/apiService';
+import { productsService, salesService, invoicesService, expensesService, settingsService } from '../services/apiService';
 import './Dashboard.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -13,6 +13,8 @@ export const Dashboard: React.FC = () => {
   const [topAlerts, setTopAlerts] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [unpaidInvoicesCount, setUnpaidInvoicesCount] = useState(0);
+  const [isEnterprise, setIsEnterprise] = useState(false);
+  const [todayExpenses, setTodayExpenses] = useState(0);
 
   useEffect(() => {
     const loadData = async () => {
@@ -90,6 +92,24 @@ export const Dashboard: React.FC = () => {
           };
       });
       setChartData(newChartData);
+
+      // Check Enterprise and Expenses
+      try {
+          const settings = await settingsService.get();
+          if (settings?.subscription === 'Enterprise') {
+              setIsEnterprise(true);
+              const allExpenses = await expensesService.getAll();
+              let expToday = 0;
+              allExpenses.forEach((exp: any) => {
+                  if (exp.date.split('T')[0] === todayStr) {
+                      expToday += exp.amount || 0;
+                  }
+              });
+              setTodayExpenses(expToday);
+          }
+      } catch (e) {
+          console.error('Erreur chargement expenses:', e);
+      }
     
       // 2. Process Inventory Alerts
       try {
@@ -139,6 +159,19 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="stat-value">{todayCA.toLocaleString('fr-FR')} F</div>
         </Card>
+
+        {isEnterprise && (
+          <Card className="stat-card" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+            <div className="stat-header">
+              <span className="stat-title text-success" style={{ fontWeight: 'bold' }}>BÉNÉFICE NET</span>
+              <div className="stat-icon bg-white text-success rounded-md">
+                <Banknote size={18} />
+              </div>
+            </div>
+            <div className="stat-value text-success">{(todayCA - todayExpenses).toLocaleString('fr-FR')} F</div>
+            <div className="stat-footer text-muted text-sm" style={{ marginTop: '4px' }}>CA - Dépenses ({todayExpenses.toLocaleString()} F)</div>
+          </Card>
+        )}
         
         <Card className="stat-card">
           <div className="stat-header">

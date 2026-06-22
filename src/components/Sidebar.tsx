@@ -14,9 +14,11 @@ import {
   Settings,
   ChevronLeft,
   Store,
-  FileSignature
+  FileSignature,
+  Wallet,
+  Lock
 } from 'lucide-react';
-import { productsService } from '../services/apiService';
+import { productsService, settingsService } from '../services/apiService';
 import './Sidebar.css';
 
 const navItems = [
@@ -30,6 +32,7 @@ const navItems = [
   { path: '/clients', icon: Users, label: 'Clients' },
   { path: '/fournisseurs', icon: Truck, label: 'Fournisseurs' },
   { path: '/rapports', icon: PieChart, label: 'Rapports' },
+  { path: '/depenses', icon: Wallet, label: 'Dépenses', requiresEnterprise: true },
   { path: '/abonnement', icon: CreditCard, label: 'Abonnement' },
   { path: '/parametres', icon: Settings, label: 'Paramètres' },
 ];
@@ -44,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
     localStorage.getItem('company_logo')
   );
   const [alertsCount, setAlertsCount] = useState(0);
+  const [isEnterprise, setIsEnterprise] = useState(false);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -55,8 +59,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
         console.error("Erreur alertes inventaire:", e);
       }
     };
+
+    const fetchSettings = async () => {
+      try {
+        const settings = await settingsService.get();
+        if (settings?.subscription === 'Enterprise') {
+          setIsEnterprise(true);
+        }
+      } catch (e) {
+        console.error("Erreur settings Sidebar:", e);
+      }
+    };
     
     fetchAlerts();
+    fetchSettings();
 
     const handleLogoUpdate = () => {
       setCompanyLogo(localStorage.getItem('company_logo'));
@@ -102,6 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
             <item.icon size={20} className="nav-icon" />
             {!isCollapsed && <span className="nav-label">{item.label}</span>}
             {!isCollapsed && badgeValue && <span className="nav-badge">{badgeValue}</span>}
+            {!isCollapsed && (item as any).requiresEnterprise && !isEnterprise && <Lock size={14} className="nav-icon" style={{ marginLeft: 'auto', opacity: 0.5 }} />}
           </NavLink>
         )})}
       </nav>

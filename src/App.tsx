@@ -22,6 +22,7 @@ import { Inventaire } from './pages/Inventaire';
 import { Fournisseurs } from './pages/Fournisseurs';
 import { Rapports } from './pages/Rapports';
 import { Parametres } from './pages/Parametres';
+import { Depenses } from './pages/Depenses';
 
 import { LandingPage } from './pages/LandingPage';
 
@@ -45,6 +46,7 @@ function App() {
             <Route path="rapports" element={<Rapports />} />
             <Route path="facturation" element={<Facturation />} />
             <Route path="abonnement" element={<Abonnement />} />
+            <Route path="depenses" element={<Depenses />} />
             <Route path="parametres" element={<Parametres />} />
             {/* Add more routes here */}
           </Route>
