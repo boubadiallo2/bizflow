@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Store, ArrowLeft } from 'lucide-react';
 import { authService } from '../services/apiService';
+import Swal from 'sweetalert2';
 import './RegisterPage.css';
 
 export const RegisterPage: React.FC = () => {
@@ -72,6 +73,32 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    const { value: method } = await Swal.fire({
+      title: 'Moyen de paiement',
+      text: 'Veuillez configurer votre moyen de paiement par défaut pour la plateforme',
+      input: 'select',
+      inputOptions: {
+        'Wave': 'Wave',
+        'Orange Money': 'Orange Money',
+        'Carte Bancaire': 'Carte Bancaire',
+        'Chèque': 'Chèque',
+        'Virement': 'Virement'
+      },
+      inputPlaceholder: 'Sélectionner un moyen de paiement',
+      showCancelButton: true,
+      confirmButtonText: 'Terminer l\'inscription',
+      cancelButtonText: 'Annuler',
+      customClass: {
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-secondary',
+        popup: 'swal-bizflow-popup'
+      }
+    });
+
+    if (!method) {
+      return; // Annulé par l'utilisateur
+    }
+
     setLoading(true);
     try {
       await authService.register({
@@ -84,7 +111,8 @@ export const RegisterPage: React.FC = () => {
         city: formData.city,
         address: formData.address,
         country: formData.country,
-        selectedProducts: formData.selectedProducts
+        selectedProducts: formData.selectedProducts,
+        paymentMethod: method
       });
       navigate('/login');
     } catch (err: any) {
