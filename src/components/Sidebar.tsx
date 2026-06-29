@@ -43,8 +43,10 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCollapse }) => {
+  const getLogoKey = () => `company_logo_${localStorage.getItem('bizflow_tenantId') || 'default'}`;
+
   const [companyLogo, setCompanyLogo] = useState<string | null>(
-    localStorage.getItem('company_logo')
+    localStorage.getItem(getLogoKey())
   );
   const [alertsCount, setAlertsCount] = useState(0);
   const [isEnterprise, setIsEnterprise] = useState(false);
@@ -63,8 +65,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
     const fetchSettings = async () => {
       try {
         const settings = await settingsService.get();
-        if (settings?.subscription === 'Enterprise') {
-          setIsEnterprise(true);
+        if (settings) {
+          if (settings.subscription === 'Enterprise') {
+            setIsEnterprise(true);
+          }
+          if (settings.logo) {
+            setCompanyLogo(settings.logo);
+            localStorage.setItem(getLogoKey(), settings.logo);
+          } else {
+            setCompanyLogo(null);
+            localStorage.removeItem(getLogoKey());
+          }
         }
       } catch (e) {
         console.error("Erreur settings Sidebar:", e);
@@ -75,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
     fetchSettings();
 
     const handleLogoUpdate = () => {
-      setCompanyLogo(localStorage.getItem('company_logo'));
+      setCompanyLogo(localStorage.getItem(getLogoKey()));
     };
     
     window.addEventListener('logo-updated', handleLogoUpdate);

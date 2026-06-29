@@ -138,7 +138,8 @@ export const Parametres: React.FC = () => {
       setLogoPreview(base64);
       try {
         await settingsService.save({ ...companyInfo, logo: base64 });
-        localStorage.setItem('company_logo', base64);
+        const tenantId = localStorage.getItem('bizflow_tenantId') || 'default';
+        localStorage.setItem(`company_logo_${tenantId}`, base64);
         setLogoSaved(true);
         setTimeout(() => setLogoSaved(false), 3000);
         window.dispatchEvent(new Event('logo-updated'));
@@ -172,7 +173,8 @@ export const Parametres: React.FC = () => {
 
   const removeLogo = async () => {
     setLogoPreview(null);
-    localStorage.removeItem('company_logo');
+    const tenantId = localStorage.getItem('bizflow_tenantId') || 'default';
+    localStorage.removeItem(`company_logo_${tenantId}`);
     try {
       await settingsService.save({ ...companyInfo, logo: null });
       if (fileInputRef.current) fileInputRef.current.value = '';

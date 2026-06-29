@@ -30,6 +30,11 @@ export const Abonnement: React.FC = () => {
             name: data.name || 'Entreprise',
             sector: data.commerceType || 'Secteur non défini'
           });
+        } else {
+          setCompanyInfo({
+            name: 'Entreprise',
+            sector: 'Secteur non défini'
+          });
         }
         if (data?.subscription === 'Business') {
           setPlan({
@@ -42,6 +47,10 @@ export const Abonnement: React.FC = () => {
         }
       } catch (e) {
         console.error('Erreur chargement abonnement:', e);
+        setCompanyInfo({
+          name: 'Entreprise',
+          sector: 'Secteur non défini'
+        });
       }
     };
     loadSubscription();
