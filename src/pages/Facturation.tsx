@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2, Printer, Download, Edit2 } from 'lucide-react';
+import { Banknote, AlertTriangle, Search, FileText, ArrowLeft, Plus, Trash2, Printer, Download, Edit2, Eye } from 'lucide-react';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import { Card } from '../components/Card';
@@ -736,7 +736,7 @@ export const Facturation: React.FC = () => {
                     </td>
                     <td style={{ padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <Button variant="secondary" onClick={() => { setViewingInvoice(invoice); setAutoAction('download'); }} icon={<Download size={16} />}>Télécharger</Button>
+                        <Button variant="secondary" onClick={() => setViewingInvoice(invoice)} icon={<Eye size={16} />}>Afficher</Button>
                         <button 
                           onClick={() => handleEditInvoice(invoice)} 
                           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px' }} 
