@@ -271,13 +271,23 @@ export const Parametres: React.FC = () => {
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">Type de commerce</label>
-              <input 
-                type="text" 
-                className="form-input" 
+              <select 
+                name="commerceType"
+                className="form-select" 
                 value={companyInfo.commerceType} 
-                readOnly 
-                style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text-muted)' }}
-              />
+                onChange={handleChange}
+              >
+                <option value="" disabled>Sélectionnez votre type d'activité</option>
+                <option value="Alimentation / Supermarché">Alimentation / Supermarché</option>
+                <option value="Boutique de vêtements">Boutique de vêtements</option>
+                <option value="Électronique / Informatique">Électronique / Informatique</option>
+                <option value="Pharmacie">Pharmacie</option>
+                <option value="Restauration">Restauration</option>
+                <option value="Quincaillerie">Quincaillerie</option>
+                <option value="Beauté & Cosmétiques">Beauté & Cosmétiques</option>
+                <option value="Optique / Lunetterie">Optique / Lunetterie</option>
+                <option value="Autre">Autre</option>
+              </select>
             </div>
             <div className="form-group">
               <label className="form-label">Pays</label>
