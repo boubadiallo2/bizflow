@@ -99,6 +99,8 @@
   border: 1px solid #eee;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   min-height: 1000px;
+  display: flex;
+  flex-direction: column;
 }
 
 .quote-header {
@@ -169,7 +171,7 @@
 
 .quote-footer {
   clear: both;
-  margin-top: 60px;
+  margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;
   color: #475569;

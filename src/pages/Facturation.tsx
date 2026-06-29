@@ -224,7 +224,7 @@ export const Facturation: React.FC = () => {
           </div>
         </div>
         
-        <div id="invoice-pdf-content" className="optic-invoice-document" style={{ width: '210mm', minHeight: '297mm', padding: '20mm', margin: '0 auto', backgroundColor: 'white', color: '#00a3e0', fontFamily: 'Arial, sans-serif', boxSizing: 'border-box' }}>
+        <div id="invoice-pdf-content" className="optic-invoice-document" style={{ width: '210mm', minHeight: '297mm', padding: '20mm', margin: '0 auto', backgroundColor: 'white', color: '#00a3e0', fontFamily: 'Arial, sans-serif', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
           
           <div style={{ textAlign: 'center', marginBottom: '10px' }}>
             {companySettings?.logo ? (
@@ -368,7 +368,7 @@ export const Facturation: React.FC = () => {
           
 
           
-          <div style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.4' }}>
+          <div style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.4', marginTop: 'auto', paddingTop: '40px' }}>
             <p style={{ margin: '0' }}>RCCM : {companySettings?.rccm || '...................'} - NINEA : {companySettings?.ninea || '...................'}</p>
             <p style={{ margin: '0' }}>Adresse : {companySettings?.address || '...................'}</p>
             <p style={{ margin: '0' }}>Tél : {companySettings?.phone || '...................'} - Email : {companySettings?.email || '...................'}</p>
