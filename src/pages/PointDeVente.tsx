@@ -714,7 +714,7 @@ export const PointDeVente: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
                 <Button variant="primary" onClick={() => { window.print(); }} style={{ width: '100%', justifyContent: 'center' }}>Imprimer le reçu</Button>
-                <Button variant="secondary" onClick={handleCloseReceipt} style={{ width: '100%', justifyContent: 'center', border: '1px solid var(--color-border)', background: 'transparent' }}>Nouvelle vente</Button>
+                <Button variant="secondary" onClick={handleCloseReceipt} style={{ width: '100%', justifyContent: 'center', border: '1px solid var(--color-border)', background: 'transparent' }}>Continuer la vente</Button>
               </div>
             </div>
           </div>
