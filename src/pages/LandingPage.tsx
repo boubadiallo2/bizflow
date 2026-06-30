@@ -25,7 +25,8 @@ export const LandingPage: React.FC = () => {
       {/* Navbar */}
       <nav className="landing-navbar">
         <div className="landing-brand">
-          <img src="/logo.png" alt="Nexora" style={{ height: '40px' }} />
+          <img src="/logo.png" alt="Nexora Logo" style={{ height: '40px' }} />
+          <h1>Nexora</h1>
         </div>
         <div className="landing-nav-links">
           <a href="#modules" className="landing-nav-link">Modules</a>
