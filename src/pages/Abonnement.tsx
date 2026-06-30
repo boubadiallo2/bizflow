@@ -12,12 +12,12 @@ export const Abonnement: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [companyInfo, setCompanyInfo] = useState({ name: 'Chargement...', sector: 'Chargement...' });
   
-  // Default to Starter
+  const [renewalDate, setRenewalDate] = useState('Calcul en cours...');
   const [plan, setPlan] = useState({
-    name: 'Essai Gratuit',
+    name: 'Plan Starter',
     icon: <Sprout size={28} className="text-success" />,
     color: 'text-success',
-    freq: 'Gratuit (30 jours restants)',
+    freq: 'Mensuel',
     features: ['Jusqu\'à 20 produits', '50 clients maximum', '100 transactions/mois', '1 utilisateur', 'POS basique', 'Rapports simples']
   });
 
@@ -36,13 +36,37 @@ export const Abonnement: React.FC = () => {
             sector: 'Secteur non défini'
           });
         }
-        if (data?.subscription === 'Business') {
+        if (data?.tenantCreatedAt) {
+          const createdAt = new Date(data.tenantCreatedAt);
+          const nextMonth = new Date(createdAt);
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          setRenewalDate(nextMonth.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }));
+        }
+
+        const sub = data?.tenantSubscription || 'Starter';
+        if (sub === 'Starter') {
+          setPlan({
+            name: 'Plan Starter',
+            icon: <Sprout size={28} className="text-success" />,
+            color: 'text-success',
+            freq: 'Mensuel',
+            features: ['Jusqu\'à 20 produits', '50 clients maximum', '100 transactions/mois', '1 utilisateur', 'POS basique', 'Rapports simples']
+          });
+        } else if (sub === 'Business') {
           setPlan({
             name: 'Plan Business',
             icon: <Rocket size={28} className="text-primary" />,
             color: 'text-primary',
-            freq: 'Payé',
+            freq: 'Mensuel',
             features: ['Produits illimités', 'Clients illimités', 'Transactions illimitées', 'Multi-utilisateurs', 'POS avancé', 'Export PDF & Rapports complets']
+          });
+        } else if (sub === 'Enterprise') {
+          setPlan({
+            name: 'Plan Enterprise',
+            icon: <Crown size={28} style={{ color: '#f59e0b' }} />,
+            color: 'text-warning',
+            freq: 'Mensuel',
+            features: ['Toutes les fonctions Business', 'Gestion des Dépenses', 'Support Prioritaire', 'Sauvegardes Avancées']
           });
         }
       } catch (e) {
@@ -83,7 +107,7 @@ export const Abonnement: React.FC = () => {
             </div>
             <div>
               <h3 className="text-xl font-bold">{plan.name}</h3>
-              <p className="text-muted text-sm mt-1">{plan.name === 'Essai Gratuit' ? 'Pour démarrer et tester (30 jours)' : 'L\'expérience complète pour votre PME'}</p>
+              <p className="text-muted text-sm mt-1">L'expérience complète pour votre PME</p>
             </div>
           </div>
           <div className={`status-badge ${plan.name === 'Plan Business' ? 'bg-primary-light text-primary' : ''}`}>
@@ -108,7 +132,7 @@ export const Abonnement: React.FC = () => {
             <span className="info-label text-muted text-sm flex items-center gap-1">
               <Calendar size={14} /> Renouvellement
             </span>
-            <span className="info-value font-semibold">08 mai 2036</span>
+            <span className="info-value font-semibold">{renewalDate}</span>
           </div>
           <div className="info-item">
             <span className="info-label text-muted text-sm flex items-center gap-1">
@@ -131,7 +155,7 @@ export const Abonnement: React.FC = () => {
         </div>
       </Card>
 
-      {plan.name === 'Essai Gratuit' && (
+      {plan.name === 'Plan Starter' && (
         <Card className="upgrade-card mt-6 bg-primary-light border-primary">
           <div className="flex justify-between items-center">
             <div>
@@ -140,7 +164,7 @@ export const Abonnement: React.FC = () => {
                 Débloquez l'export PDF, les rapports avancés et les transactions illimitées.
               </p>
             </div>
-            <Button variant="primary" onClick={() => setIsUpgradeModalOpen(true)}>Upgrader → 15 000 FCFA/mois</Button>
+            <Button variant="primary" onClick={() => setIsUpgradeModalOpen(true)}>Upgrader → 10 000 FCFA/mois</Button>
           </div>
         </Card>
       )}

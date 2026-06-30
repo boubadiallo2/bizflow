@@ -440,7 +440,13 @@ app.get('/api/settings', authenticateToken, requireTenant, async (req, res) => {
   try {
     const tenantId = req.user!.tenantId!;
     const data = await db.select().from(settings).where(eq(settings.tenantId, tenantId));
-    res.json(data[0] || null);
+    const tenantData = await db.select({ createdAt: tenants.createdAt, subscription: tenants.subscription }).from(tenants).where(eq(tenants.id, tenantId));
+    
+    let result = data[0] || {};
+    if (tenantData.length > 0) {
+      result = { ...result, tenantCreatedAt: tenantData[0].createdAt, tenantSubscription: tenantData[0].subscription };
+    }
+    res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
