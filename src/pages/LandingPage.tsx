@@ -75,6 +75,30 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Moyens de paiement */}
+      <section style={{ padding: '2rem 5%', backgroundColor: 'var(--color-surface)', textAlign: 'center' }}>
+        <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontWeight: 500 }}>
+          Moyens de paiement acceptés et sécurisés
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <div style={{ backgroundColor: '#13B1E6', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+            Wave
+          </div>
+          <div style={{ backgroundColor: '#FF6600', color: 'black', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+            Orange Money
+          </div>
+          <div style={{ backgroundColor: '#E2001A', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+            Free Money
+          </div>
+          <div style={{ backgroundColor: '#1A1F71', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center', fontStyle: 'italic' }}>
+            VISA
+          </div>
+          <div style={{ backgroundColor: '#21125E', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
+            <span style={{ color: '#EB001B', marginRight: '4px' }}>●</span><span style={{ color: '#F79E1B' }}>●</span> Mastercard
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="features-section">
         <h2 className="section-title">Tout ce dont vous avez besoin</h2>
@@ -213,29 +237,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Moyens de paiement */}
-        <div style={{ marginTop: '4rem', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontWeight: 500 }}>
-            Moyens de paiement acceptés et sécurisés
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-            <div style={{ backgroundColor: '#13B1E6', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
-              Wave
-            </div>
-            <div style={{ backgroundColor: '#FF6600', color: 'black', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
-              Orange Money
-            </div>
-            <div style={{ backgroundColor: '#E2001A', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
-              Free Money
-            </div>
-            <div style={{ backgroundColor: '#1A1F71', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center', fontStyle: 'italic' }}>
-              VISA
-            </div>
-            <div style={{ backgroundColor: '#21125E', color: 'white', padding: '8px 20px', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#EB001B', marginRight: '4px' }}>●</span><span style={{ color: '#F79E1B' }}>●</span> Mastercard
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* Footer */}
