@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Store, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { authService } from '../services/apiService';
 import Swal from 'sweetalert2';
 import './RegisterPage.css';

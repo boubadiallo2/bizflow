@@ -15,8 +15,7 @@ import {
   ChevronLeft,
   Store,
   FileSignature,
-  Wallet,
-  Lock
+  Wallet
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { productsService, settingsService } from '../services/apiService';

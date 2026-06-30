@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Store, ShoppingCart, BarChart2, Package, CheckCircle2,
+  ShoppingCart, BarChart2, Package, CheckCircle2,
   LayoutGrid, Monitor, FileText, Users, Truck, PieChart, Settings, CreditCard
 } from 'lucide-react';
 import './LandingPage.css';
