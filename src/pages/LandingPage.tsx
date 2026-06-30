@@ -44,10 +44,9 @@ export const LandingPage: React.FC = () => {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <h1 className="hero-title">Pilotez votre entreprise depuis <span>une seule plateforme</span></h1>
+        <h1 className="hero-title">Gérez. Automatisez. <span>Développez.</span></h1>
         <p className="hero-subtitle">
-          La solution ERP tout-en-un conçue pour les petites et moyennes entreprises africaines. 
-          Facturation, point de vente, inventaire et rapports centralisés sur une seule plateforme intuitive.
+          Tout votre business, sur une seule plateforme.
         </p>
         <div className="hero-cta">
           <Link to="/login" className="btn-hero btn-hero-primary">Accéder au Dashboard</Link>
