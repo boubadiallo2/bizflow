@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AuthProvider } from './contexts/AuthContext';
+import { SubscriptionGuard } from './components/SubscriptionGuard';
 
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -38,15 +39,35 @@ function App() {
             <Route path="app" element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="ventes" element={<Ventes />} />
-            <Route path="devis" element={<Devis />} />
+            <Route path="devis" element={
+              <SubscriptionGuard allowedSubscriptions={['Business', 'Enterprise']}>
+                <Devis />
+              </SubscriptionGuard>
+            } />
             <Route path="pos" element={<PointDeVente />} />
             <Route path="inventaire" element={<Inventaire />} />
             <Route path="clients" element={<Clients />} />
-            <Route path="fournisseurs" element={<Fournisseurs />} />
-            <Route path="rapports" element={<Rapports />} />
-            <Route path="facturation" element={<Facturation />} />
+            <Route path="fournisseurs" element={
+              <SubscriptionGuard allowedSubscriptions={['Business', 'Enterprise']}>
+                <Fournisseurs />
+              </SubscriptionGuard>
+            } />
+            <Route path="rapports" element={
+              <SubscriptionGuard allowedSubscriptions={['Business', 'Enterprise']}>
+                <Rapports />
+              </SubscriptionGuard>
+            } />
+            <Route path="facturation" element={
+              <SubscriptionGuard allowedSubscriptions={['Business', 'Enterprise']}>
+                <Facturation />
+              </SubscriptionGuard>
+            } />
             <Route path="abonnement" element={<Abonnement />} />
-            <Route path="depenses" element={<Depenses />} />
+            <Route path="depenses" element={
+              <SubscriptionGuard allowedSubscriptions={['Enterprise']}>
+                <Depenses />
+              </SubscriptionGuard>
+            } />
             <Route path="parametres" element={<Parametres />} />
             {/* Add more routes here */}
           </Route>

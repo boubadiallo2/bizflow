@@ -9,6 +9,7 @@ declare global {
         userId: number;
         tenantId: number | null;
         role: string;
+        subscription?: string;
       };
     }
   }
@@ -31,6 +32,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       userId: decoded.userId,
       tenantId: decoded.tenantId,
       role: decoded.role,
+      subscription: decoded.subscription,
     };
     next();
   } catch (err) {
@@ -45,4 +47,20 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction): v
     return;
   }
   next();
+};
+
+export const requireSubscription = (allowedSubscriptions: string[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user || !req.user.subscription) {
+      res.status(403).json({ error: 'Accès refusé. Abonnement introuvable.' });
+      return;
+    }
+
+    if (!allowedSubscriptions.includes(req.user.subscription)) {
+      res.status(403).json({ error: "Votre abonnement actuel ne permet pas d'accéder à cette fonctionnalité." });
+      return;
+    }
+
+    next();
+  };
 };

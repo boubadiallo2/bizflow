@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 import { db } from './db/index.js';
 import { products, clients, suppliers, sales, quotes, settings, tenants, users, invoices } from './db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { authenticateToken, requireAdmin } from './middleware/auth.js';
+import { authenticateToken, requireAdmin, requireSubscription } from './middleware/auth.js';
 
 // Charge l'environnement
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -96,8 +96,16 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Identifiants incorrects.' });
     }
 
-    const token = jwt.sign({ userId: user.id, tenantId: user.tenantId, role: user.role }, JWT_SECRET, { expiresIn: '12h' });
-    res.json({ token, role: user.role, tenantId: user.tenantId, name: user.name });
+    let subscription = 'Starter';
+    if (user.tenantId) {
+      const tenantArray = await db.select().from(tenants).where(eq(tenants.id, user.tenantId));
+      if (tenantArray.length > 0 && tenantArray[0].subscription) {
+        subscription = tenantArray[0].subscription;
+      }
+    }
+
+    const token = jwt.sign({ userId: user.id, tenantId: user.tenantId, role: user.role, subscription }, JWT_SECRET, { expiresIn: '12h' });
+    res.json({ token, role: user.role, tenantId: user.tenantId, name: user.name, subscription });
 
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -218,7 +226,7 @@ app.delete('/api/clients/:id', authenticateToken, requireTenant, async (req, res
 });
 
 // --- SUPPLIERS ---
-app.get('/api/suppliers', authenticateToken, requireTenant, async (req, res) => {
+app.get('/api/suppliers', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const data = await db.select().from(suppliers).where(eq(suppliers.tenantId, req.user!.tenantId!));
     res.json(data);
@@ -227,7 +235,7 @@ app.get('/api/suppliers', authenticateToken, requireTenant, async (req, res) => 
   }
 });
 
-app.post('/api/suppliers', authenticateToken, requireTenant, async (req, res) => {
+app.post('/api/suppliers', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const newItem = await db.insert(suppliers).values({ ...req.body, tenantId: req.user!.tenantId! }).returning();
     res.json(newItem[0]);
@@ -236,7 +244,7 @@ app.post('/api/suppliers', authenticateToken, requireTenant, async (req, res) =>
   }
 });
 
-app.put('/api/suppliers/:id', authenticateToken, requireTenant, async (req, res) => {
+app.put('/api/suppliers/:id', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const updated = await db.update(suppliers)
@@ -249,7 +257,7 @@ app.put('/api/suppliers/:id', authenticateToken, requireTenant, async (req, res)
   }
 });
 
-app.delete('/api/suppliers/:id', authenticateToken, requireTenant, async (req, res) => {
+app.delete('/api/suppliers/:id', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     await db.delete(suppliers).where(and(eq(suppliers.id, id), eq(suppliers.tenantId, req.user!.tenantId!)));
@@ -328,7 +336,7 @@ app.delete('/api/sales/:id', authenticateToken, requireTenant, async (req, res) 
 });
 
 // --- QUOTES ---
-app.get('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
+app.get('/api/quotes', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const data = await db.select().from(quotes).where(eq(quotes.tenantId, req.user!.tenantId!));
     res.json(data);
@@ -337,7 +345,7 @@ app.get('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
   }
 });
 
-app.post('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
+app.post('/api/quotes', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const payload = { ...req.body, tenantId: req.user!.tenantId! };
     if (payload.date) payload.date = new Date(payload.date);
@@ -350,7 +358,7 @@ app.post('/api/quotes', authenticateToken, requireTenant, async (req, res) => {
   }
 });
 
-app.put('/api/quotes/:id', authenticateToken, requireTenant, async (req, res) => {
+app.put('/api/quotes/:id', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const payload = { ...req.body };
@@ -366,7 +374,7 @@ app.put('/api/quotes/:id', authenticateToken, requireTenant, async (req, res) =>
   }
 });
 
-app.delete('/api/quotes/:id', authenticateToken, requireTenant, async (req, res) => {
+app.delete('/api/quotes/:id', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     await db.delete(quotes).where(and(eq(quotes.id, id), eq(quotes.tenantId, req.user!.tenantId!)));
@@ -377,7 +385,7 @@ app.delete('/api/quotes/:id', authenticateToken, requireTenant, async (req, res)
 });
 
 // --- INVOICES ---
-app.get('/api/invoices', authenticateToken, requireTenant, async (req, res) => {
+app.get('/api/invoices', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const data = await db.select().from(invoices).where(eq(invoices.tenantId, req.user!.tenantId!));
     res.json(data);
@@ -386,7 +394,7 @@ app.get('/api/invoices', authenticateToken, requireTenant, async (req, res) => {
   }
 });
 
-app.post('/api/invoices', authenticateToken, requireTenant, async (req, res) => {
+app.post('/api/invoices', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const payload = { ...req.body, tenantId: req.user!.tenantId! };
     if (payload.date) payload.date = new Date(payload.date);
@@ -400,7 +408,7 @@ app.post('/api/invoices', authenticateToken, requireTenant, async (req, res) => 
   }
 });
 
-app.put('/api/invoices/:id', authenticateToken, requireTenant, async (req, res) => {
+app.put('/api/invoices/:id', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const payload = { ...req.body };
@@ -417,7 +425,7 @@ app.put('/api/invoices/:id', authenticateToken, requireTenant, async (req, res) 
   }
 });
 
-app.delete('/api/invoices/:id', authenticateToken, requireTenant, async (req, res) => {
+app.delete('/api/invoices/:id', authenticateToken, requireTenant, requireSubscription(['Business', 'Enterprise']), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     await db.delete(invoices).where(and(eq(invoices.id, id), eq(invoices.tenantId, req.user!.tenantId!)));

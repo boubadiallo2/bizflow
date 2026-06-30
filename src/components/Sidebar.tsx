@@ -18,23 +18,24 @@ import {
   Wallet,
   Lock
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { productsService, settingsService } from '../services/apiService';
 import './Sidebar.css';
 
 const navItems = [
-  { path: '/app', icon: LayoutGrid, label: 'Accueil' },
-  { path: '/dashboard', icon: BarChart2, label: 'Tableau de bord' },
-  { path: '/ventes', icon: ShoppingCart, label: 'Ventes' },
-  { path: '/devis', icon: FileSignature, label: 'Devis' },
-  { path: '/pos', icon: Monitor, label: 'Point de vente' },
-  { path: '/facturation', icon: FileText, label: 'Facturation' },
-  { path: '/inventaire', icon: Package, label: 'Inventaire' },
-  { path: '/clients', icon: Users, label: 'Clients' },
-  { path: '/fournisseurs', icon: Truck, label: 'Fournisseurs' },
-  { path: '/rapports', icon: PieChart, label: 'Rapports' },
-  { path: '/depenses', icon: Wallet, label: 'Dépenses', requiresEnterprise: true },
-  { path: '/abonnement', icon: CreditCard, label: 'Abonnement' },
-  { path: '/parametres', icon: Settings, label: 'Paramètres' },
+  { path: '/app', icon: LayoutGrid, label: 'Accueil', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/dashboard', icon: BarChart2, label: 'Tableau de bord', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/ventes', icon: ShoppingCart, label: 'Ventes', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/devis', icon: FileSignature, label: 'Devis', allowed: ['Business', 'Enterprise'] },
+  { path: '/pos', icon: Monitor, label: 'Point de vente', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/facturation', icon: FileText, label: 'Facturation', allowed: ['Business', 'Enterprise'] },
+  { path: '/inventaire', icon: Package, label: 'Inventaire', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/clients', icon: Users, label: 'Clients', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/fournisseurs', icon: Truck, label: 'Fournisseurs', allowed: ['Business', 'Enterprise'] },
+  { path: '/rapports', icon: PieChart, label: 'Rapports', allowed: ['Business', 'Enterprise'] },
+  { path: '/depenses', icon: Wallet, label: 'Dépenses', allowed: ['Enterprise'] },
+  { path: '/abonnement', icon: CreditCard, label: 'Abonnement', allowed: ['Starter', 'Business', 'Enterprise'] },
+  { path: '/parametres', icon: Settings, label: 'Paramètres', allowed: ['Starter', 'Business', 'Enterprise'] },
 ];
 
 interface SidebarProps {
@@ -45,11 +46,11 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCollapse }) => {
   const getLogoKey = () => `company_logo_${localStorage.getItem('nexora_tenantId') || 'default'}`;
 
+  const { subscription } = useAuth();
   const [companyLogo, setCompanyLogo] = useState<string | null>(
     localStorage.getItem(getLogoKey())
   );
   const [alertsCount, setAlertsCount] = useState(0);
-  const [isEnterprise, setIsEnterprise] = useState(false);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -66,9 +67,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
       try {
         const settings = await settingsService.get();
         if (settings) {
-          if (settings.subscription === 'Enterprise') {
-            setIsEnterprise(true);
-          }
           if (settings.logo) {
             setCompanyLogo(settings.logo);
             localStorage.setItem(getLogoKey(), settings.logo);
@@ -117,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
       </div>
       
       <nav className="sidebar-nav">
-        {navItems.map((item) => {
+        {navItems.filter(item => item.allowed.includes(subscription || 'Starter')).map((item) => {
           const badgeValue = item.path === '/inventaire' ? (alertsCount > 0 ? alertsCount : undefined) : (item as any).badge;
           return (
           <NavLink 
@@ -129,7 +127,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
             <item.icon size={20} className="nav-icon" />
             {!isCollapsed && <span className="nav-label">{item.label}</span>}
             {!isCollapsed && badgeValue && <span className="nav-badge">{badgeValue}</span>}
-            {!isCollapsed && (item as any).requiresEnterprise && !isEnterprise && <Lock size={14} className="nav-icon" style={{ marginLeft: 'auto', opacity: 0.5 }} />}
           </NavLink>
         )})}
       </nav>
