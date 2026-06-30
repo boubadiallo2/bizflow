@@ -10,8 +10,12 @@ export const AdminSettings: React.FC = () => {
 
   // Mock settings state
   const [settings, setSettings] = useState({
-    monthlyPrice: 15000,
-    annualPrice: 150000,
+    starterMonthlyPrice: 5000,
+    starterAnnualPrice: 50000,
+    businessMonthlyPrice: 10000,
+    businessAnnualPrice: 100000,
+    enterpriseMonthlyPrice: 25000,
+    enterpriseAnnualPrice: 250000,
     trialDays: 14,
     waveApiKey: 'wave_live_xxxxxxxxxxxxx',
     orangeApiKey: 'om_live_xxxxxxxxxxxxx',
@@ -104,16 +108,16 @@ export const AdminSettings: React.FC = () => {
               <h2 className="section-title">Tarification & Plans</h2>
               <p className="section-desc">Gérez les prix affichés sur la page d'abonnement des locataires.</p>
 
-              <div className="settings-card">
-                <h3>Plan Pro</h3>
+              <div className="settings-card" style={{ marginBottom: '1.5rem' }}>
+                <h3>Plan Starter</h3>
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Prix Mensuel (FCFA)</label>
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="monthlyPrice"
-                      value={settings.monthlyPrice}
+                      name="starterMonthlyPrice"
+                      value={settings.starterMonthlyPrice}
                       onChange={handleChange}
                     />
                   </div>
@@ -122,21 +126,78 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="annualPrice"
-                      value={settings.annualPrice}
+                      name="starterAnnualPrice"
+                      value={settings.starterAnnualPrice}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="settings-card" style={{ marginBottom: '1.5rem' }}>
+                <h3>Plan Business</h3>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Prix Mensuel (FCFA)</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      name="businessMonthlyPrice"
+                      value={settings.businessMonthlyPrice}
                       onChange={handleChange}
                     />
                   </div>
                   <div className="form-group">
-                    <label>Jours d'essai gratuit</label>
+                    <label>Prix Annuel (FCFA)</label>
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="trialDays"
-                      value={settings.trialDays}
+                      name="businessAnnualPrice"
+                      value={settings.businessAnnualPrice}
                       onChange={handleChange}
                     />
                   </div>
+                </div>
+              </div>
+
+              <div className="settings-card" style={{ marginBottom: '1.5rem' }}>
+                <h3>Plan Enterprise</h3>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Prix Mensuel (FCFA)</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      name="enterpriseMonthlyPrice"
+                      value={settings.enterpriseMonthlyPrice}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Prix Annuel (FCFA)</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      name="enterpriseAnnualPrice"
+                      value={settings.enterpriseAnnualPrice}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="settings-card">
+                <h3>Paramètres Généraux</h3>
+                <div className="form-group">
+                  <label>Jours d'essai gratuit (tous les plans)</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    name="trialDays"
+                    value={settings.trialDays}
+                    onChange={handleChange}
+                    style={{ maxWidth: '200px' }}
+                  />
                 </div>
               </div>
             </div>
