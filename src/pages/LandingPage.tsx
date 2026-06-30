@@ -44,7 +44,7 @@ export const LandingPage: React.FC = () => {
 
       {/* Hero Section */}
       <section className="hero-section">
-        <h1 className="hero-title">Gérez votre PME en <span>toute simplicité</span> avec BizFlow</h1>
+        <h1 className="hero-title">Pilotez votre entreprise depuis <span>une seule plateforme</span></h1>
         <p className="hero-subtitle">
           La solution ERP tout-en-un conçue pour les petites et moyennes entreprises africaines. 
           Facturation, point de vente, inventaire et rapports centralisés sur une seule plateforme intuitive.
