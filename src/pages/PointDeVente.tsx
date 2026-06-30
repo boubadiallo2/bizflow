@@ -92,6 +92,19 @@ export const PointDeVente: React.FC = () => {
       
       if (userSettings && userSettings.selectedProducts && userSettings.selectedProducts.length > 0) {
         categoriesToGenerate = userSettings.selectedProducts;
+      } else if (userSettings && userSettings.commerceType) {
+        const commerceOptions: Record<string, string[]> = {
+          'Alimentation / Supermarché': ['Produits frais', 'Boissons', 'Épicerie', 'Surgelés', 'Boulangerie'],
+          'Boutique de vêtements': ['Vêtements Homme', 'Vêtements Femme', 'Enfants', 'Accessoires', 'Chaussures'],
+          'Électronique / Informatique': ['Smartphones', 'Ordinateurs', 'Accessoires PC', 'Électroménager'],
+          'Pharmacie': ['Médicaments', 'Parapharmacie', 'Matériel médical', 'Soins'],
+          'Restauration': ['Plats chauds', 'Boissons', 'Desserts', 'Entrées'],
+          'Quincaillerie': ['Outils', 'Matériaux', 'Peinture', 'Électricité', 'Plomberie'],
+          'Beauté & Cosmétiques': ['Maquillage', 'Soins du corps', 'Parfums', 'Accessoires'],
+          'Optique / Lunetterie': ['Lunettes de vue', 'Lunettes de soleil', 'Lentilles', 'Montures', 'Produits d\'entretien'],
+          'Autre': ['Divers']
+        };
+        categoriesToGenerate = commerceOptions[userSettings.commerceType] || [];
       }
       
       const productsToAdd: any[] = [];
