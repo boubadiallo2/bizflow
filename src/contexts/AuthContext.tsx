@@ -21,22 +21,22 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem('bizflow_token'));
-  const [role, setRole] = useState<string | null>(localStorage.getItem('bizflow_role'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('nexora_token'));
+  const [role, setRole] = useState<string | null>(localStorage.getItem('nexora_role'));
   const [tenantId, setTenantId] = useState<number | null>(
-    localStorage.getItem('bizflow_tenantId') ? Number(localStorage.getItem('bizflow_tenantId')) : null
+    localStorage.getItem('nexora_tenantId') ? Number(localStorage.getItem('nexora_tenantId')) : null
   );
-  const [name, setName] = useState<string | null>(localStorage.getItem('bizflow_name'));
+  const [name, setName] = useState<string | null>(localStorage.getItem('nexora_name'));
 
   const login = (newToken: string, newRole: string, newTenantId: number | null, newName: string) => {
-    localStorage.setItem('bizflow_token', newToken);
-    localStorage.setItem('bizflow_role', newRole);
+    localStorage.setItem('nexora_token', newToken);
+    localStorage.setItem('nexora_role', newRole);
     if (newTenantId !== null) {
-      localStorage.setItem('bizflow_tenantId', newTenantId.toString());
+      localStorage.setItem('nexora_tenantId', newTenantId.toString());
     } else {
-      localStorage.removeItem('bizflow_tenantId');
+      localStorage.removeItem('nexora_tenantId');
     }
-    localStorage.setItem('bizflow_name', newName);
+    localStorage.setItem('nexora_name', newName);
 
     setToken(newToken);
     setRole(newRole);
@@ -45,10 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('bizflow_token');
-    localStorage.removeItem('bizflow_role');
-    localStorage.removeItem('bizflow_tenantId');
-    localStorage.removeItem('bizflow_name');
+    localStorage.removeItem('nexora_token');
+    localStorage.removeItem('nexora_role');
+    localStorage.removeItem('nexora_tenantId');
+    localStorage.removeItem('nexora_name');
 
     setToken(null);
     setRole(null);

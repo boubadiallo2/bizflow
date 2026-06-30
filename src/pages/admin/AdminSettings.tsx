@@ -16,8 +16,8 @@ export const AdminSettings: React.FC = () => {
     waveApiKey: 'wave_live_xxxxxxxxxxxxx',
     orangeApiKey: 'om_live_xxxxxxxxxxxxx',
     maintenanceMode: false,
-    platformName: 'BizFlow',
-    supportEmail: 'support@bizflow.sn',
+    platformName: 'Nexora',
+    supportEmail: 'support@nexora.sn',
     // Notifications
     notifyNewRegistration: true,
     notifyFailedPayment: true,
@@ -52,7 +52,7 @@ export const AdminSettings: React.FC = () => {
       <div className="admin-page-header">
         <div>
           <h1>Paramètres Globaux</h1>
-          <p>Configurez les réglages principaux de la plateforme BizFlow.</p>
+          <p>Configurez les réglages principaux de la plateforme Nexora.</p>
         </div>
         <Button 
           variant="primary" 

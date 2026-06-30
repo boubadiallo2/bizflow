@@ -1,11 +1,11 @@
 import Swal from 'sweetalert2';
 
-// Configuration de base pour le style BizFlow
+// Configuration de base pour le style Nexora
 const baseConfig = {
   customClass: {
     confirmButton: 'btn btn-primary',
     cancelButton: 'btn btn-secondary',
-    popup: 'swal-bizflow-popup'
+    popup: 'swal-nexora-popup'
   },
   buttonsStyling: false,
 };

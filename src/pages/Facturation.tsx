@@ -586,7 +586,7 @@ export const Facturation: React.FC = () => {
         customClass: {
           confirmButton: 'btn btn-primary',
           cancelButton: 'btn btn-secondary',
-          popup: 'swal-bizflow-popup'
+          popup: 'swal-nexora-popup'
         }
       });
 

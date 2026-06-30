@@ -27,7 +27,7 @@ export const AdminDashboard: React.FC = () => {
     <div className="admin-dashboard-container">
       <div className="admin-dashboard-header">
         <h1>Vue d'ensemble</h1>
-        <p>Surveillez l'activité et la croissance de la plateforme BizFlow.</p>
+        <p>Surveillez l'activité et la croissance de la plateforme Nexora.</p>
       </div>
 
       <div className="admin-kpi-grid">

@@ -18,7 +18,7 @@ export const AdminHeader: React.FC = () => {
           </div>
           <div className="admin-user-info">
             <span className="admin-user-name">Super Administrateur</span>
-            <span className="admin-user-role">test@bizflow.sn</span>
+            <span className="admin-user-role">test@nexora.sn</span>
           </div>
         </div>
         <button className="admin-logout-btn" onClick={handleLogout}>

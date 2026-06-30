@@ -76,7 +76,7 @@ export const AdminClients: React.FC = () => {
       <div className="admin-page-header">
         <div>
           <h1>Clients & Locataires</h1>
-          <p>Supervisez tous les commerces utilisant BizFlow.</p>
+          <p>Supervisez tous les commerces utilisant Nexora.</p>
         </div>
         <div className="metrics-badge">
           <div className="metric-item">

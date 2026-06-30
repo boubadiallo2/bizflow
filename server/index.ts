@@ -80,7 +80,7 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Super Admin static check
-    if (email === 'test@bizflow.sn' && password === 'Passer@12345') {
+    if (email === 'test@nexora.sn' && password === 'Passer@12345') {
       const token = jwt.sign({ userId: 0, tenantId: null, role: 'SuperAdmin' }, JWT_SECRET, { expiresIn: '12h' });
       return res.json({ token, role: 'SuperAdmin', name: 'Super Administrateur' });
     }

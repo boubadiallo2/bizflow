@@ -46,7 +46,7 @@ export const LoginPage: React.FC = () => {
             <div className="login-brand-icon">
               <Store size={28} />
             </div>
-            <h1>BizFlow</h1>
+            <h1>Nexora</h1>
           </Link>
           <h2 className="login-title">Bon retour !</h2>
           <p className="login-subtitle">Connectez-vous à votre compte</p>

@@ -210,7 +210,7 @@ export const Devis: React.FC = () => {
               {companySettings?.logo ? (
                 <img src={companySettings.logo} alt="Logo" style={{ maxHeight: '80px', marginBottom: '10px' }} />
               ) : (
-                <h1 style={{ margin: 0 }}>{companySettings?.name || 'BizFlow ERP'}</h1>
+                <h1 style={{ margin: 0 }}>{companySettings?.name || 'Nexora ERP'}</h1>
               )}
               <p>{companySettings?.address || '123 Avenue du Commerce'}</p>
               <p>{companySettings?.phone || 'Tél: +221 77 123 45 67'}</p>

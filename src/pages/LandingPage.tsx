@@ -28,7 +28,7 @@ export const LandingPage: React.FC = () => {
           <div className="landing-brand-icon">
             <Store size={24} />
           </div>
-          <h1>BizFlow</h1>
+          <h1>Nexora</h1>
         </div>
         <div className="landing-nav-links">
           <a href="#modules" className="landing-nav-link">Modules</a>
@@ -246,7 +246,7 @@ export const LandingPage: React.FC = () => {
         <div className="footer-content">
           <div className="footer-brand">
             <Store size={24} />
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>BizFlow</h2>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Nexora</h2>
           </div>
           <div className="footer-links">
             <a href="#">Conditions générales</a>
@@ -255,7 +255,7 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
         <div className="footer-bottom">
-          &copy; {new Date().getFullYear()} BizFlow ERP. Tous droits réservés.
+          &copy; {new Date().getFullYear()} Nexora ERP. Tous droits réservés.
         </div>
       </footer>
     </div>

@@ -2,7 +2,7 @@ const API_URL = '/api';
 
 // Helper pour récupérer le token depuis le localStorage
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('bizflow_token');
+  const token = localStorage.getItem('nexora_token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -12,10 +12,10 @@ const getAuthHeaders = () => {
 const handleResponse = async (res: Response) => {
   if (res.status === 401 || res.status === 403) {
     // Token expiré ou invalide
-    localStorage.removeItem('bizflow_token');
-    localStorage.removeItem('bizflow_role');
-    localStorage.removeItem('bizflow_tenantId');
-    localStorage.removeItem('bizflow_name');
+    localStorage.removeItem('nexora_token');
+    localStorage.removeItem('nexora_role');
+    localStorage.removeItem('nexora_tenantId');
+    localStorage.removeItem('nexora_name');
     window.location.href = '/login';
     throw new Error('Session expirée. Veuillez vous reconnecter.');
   }

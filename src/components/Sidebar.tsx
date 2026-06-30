@@ -43,7 +43,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCollapse }) => {
-  const getLogoKey = () => `company_logo_${localStorage.getItem('bizflow_tenantId') || 'default'}`;
+  const getLogoKey = () => `company_logo_${localStorage.getItem('nexora_tenantId') || 'default'}`;
 
   const [companyLogo, setCompanyLogo] = useState<string | null>(
     localStorage.getItem(getLogoKey())
@@ -110,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
         </div>
         {!isCollapsed && (
           <div className="brand-text">
-            <h1>BizFlow</h1>
+            <h1>Nexora</h1>
             <p>ERP pour PME</p>
           </div>
         )}

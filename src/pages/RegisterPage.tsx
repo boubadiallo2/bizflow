@@ -91,7 +91,7 @@ export const RegisterPage: React.FC = () => {
       customClass: {
         confirmButton: 'btn btn-primary',
         cancelButton: 'btn btn-secondary',
-        popup: 'swal-bizflow-popup'
+        popup: 'swal-nexora-popup'
       }
     });
 
@@ -134,7 +134,7 @@ export const RegisterPage: React.FC = () => {
             <div className="register-brand-icon">
               <Store size={28} />
             </div>
-            <h1>BizFlow</h1>
+            <h1>Nexora</h1>
           </Link>
           <h2 className="register-title">Créez votre compte</h2>
           <p className="register-subtitle">Commencez à gérer votre entreprise dès aujourd'hui</p>
