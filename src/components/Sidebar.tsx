@@ -49,6 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
   const [companyLogo, setCompanyLogo] = useState<string | null>(
     localStorage.getItem(getLogoKey())
   );
+  const [companyName, setCompanyName] = useState<string>('Ma Boutique');
   const [alertsCount, setAlertsCount] = useState(0);
 
   useEffect(() => {
@@ -66,6 +67,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
       try {
         const settings = await settingsService.get();
         if (settings) {
+          if (settings.companyName) {
+            setCompanyName(settings.companyName);
+          }
           if (settings.logo) {
             setCompanyLogo(settings.logo);
             localStorage.setItem(getLogoKey(), settings.logo);
@@ -107,8 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
         </div>
         {!isCollapsed && (
           <div className="brand-text">
-            <img src="/logo.png" alt="Nexora" style={{ height: '28px', marginBottom: '4px' }} />
-            <p>ERP pour PME</p>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>{companyName}</h3>
           </div>
         )}
       </div>

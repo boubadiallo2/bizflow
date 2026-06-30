@@ -10,12 +10,13 @@ const getAuthHeaders = () => {
 };
 
 const handleResponse = async (res: Response) => {
-  if (res.status === 401 || res.status === 403) {
+  if (res.status === 401) {
     // Token expiré ou invalide
     localStorage.removeItem('nexora_token');
     localStorage.removeItem('nexora_role');
     localStorage.removeItem('nexora_tenantId');
     localStorage.removeItem('nexora_name');
+    localStorage.removeItem('nexora_subscription');
     window.location.href = '/login';
     throw new Error('Session expirée. Veuillez vous reconnecter.');
   }
