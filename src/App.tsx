@@ -26,6 +26,9 @@ import { Parametres } from './pages/Parametres';
 import { Depenses } from './pages/Depenses';
 
 import { LandingPage } from './pages/LandingPage';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { ContactPage } from './pages/ContactPage';
 
 function App() {
   return (
@@ -35,6 +38,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route element={<Layout />}>
             <Route path="app" element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />

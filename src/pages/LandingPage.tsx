@@ -246,9 +246,9 @@ export const LandingPage: React.FC = () => {
             <img src="/logo.png" alt="Nexora" style={{ height: '32px' }} />
           </div>
           <div className="footer-links">
-            <a href="#">Conditions générales</a>
-            <a href="#">Confidentialité</a>
-            <a href="#">Contact</a>
+            <Link to="/terms">Conditions générales</Link>
+            <Link to="/privacy">Confidentialité</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
         <div className="footer-bottom">
