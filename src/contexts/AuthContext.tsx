@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (newToken: string, newRole: string, newTenantId: number | null, newName: string, newSubscription: string, newPermissions: string[] = []) => {
     localStorage.setItem('nexora_token', newToken);
     localStorage.setItem('nexora_role', newRole);
-    if (newTenantId !== null) {
+    if (newTenantId !== null && newTenantId !== undefined) {
       localStorage.setItem('nexora_tenantId', newTenantId.toString());
     } else {
       localStorage.removeItem('nexora_tenantId');

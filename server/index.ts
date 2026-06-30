@@ -82,7 +82,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Super Admin static check
     if (email === 'test@nexora.sn' && password === 'Passer@12345') {
       const token = jwt.sign({ userId: 0, tenantId: null, role: 'SuperAdmin' }, JWT_SECRET, { expiresIn: '12h' });
-      return res.json({ token, role: 'SuperAdmin', name: 'Super Administrateur' });
+      return res.json({ token, role: 'SuperAdmin', tenantId: null, name: 'Super Administrateur', subscription: 'Enterprise', permissions: [] });
     }
 
     // Demo account check and auto-provisioning
