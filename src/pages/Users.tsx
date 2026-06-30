@@ -3,7 +3,6 @@ import { usersService } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { Trash2, UserPlus, Shield, User } from 'lucide-react';
 import Swal from 'sweetalert2';
-import './Users.css';
 
 interface UserData {
   id: string | number;
