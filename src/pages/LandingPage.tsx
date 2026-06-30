@@ -260,7 +260,6 @@ export const LandingPage: React.FC = () => {
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
                 {isYearly ? prices.businessPriceYearly.toLocaleString('fr-FR') : prices.businessPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / {isYearly ? 'an' : 'mois'}</span>
               </div>
-              {!isYearly && <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou {prices.businessPriceYearly.toLocaleString('fr-FR')} FCFA / an</p>}
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
