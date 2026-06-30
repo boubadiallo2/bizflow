@@ -143,7 +143,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
             <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
-              Commencer
+              S'abonner
             </Link>
           </div>
 
@@ -153,9 +153,9 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Business</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                15 000 <span>FCFA / mois</span>
+                10 000 <span>FCFA / mois</span>
               </div>
-              <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou 120 000 FCFA / an (4 mois gratuits)</p>
+              <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou 80 000 FCFA / an (4 mois gratuits)</p>
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
@@ -185,7 +185,7 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Enterprise</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                30 000 <span>FCFA / mois</span>
+                25 000 <span>FCFA / mois</span>
               </div>
               <p className="text-muted mt-2">Pour les grandes entreprises</p>
             </div>
@@ -208,7 +208,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
             <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
-              Nous contacter
+              S'abonner
             </Link>
           </div>
         </div>
