@@ -27,11 +27,14 @@ export const LandingPage: React.FC = () => {
   const { login } = useAuth();
   
   const [isDemoLoading, setIsDemoLoading] = React.useState(false);
+  const [isYearly, setIsYearly] = useState(false);
   const [prices, setPrices] = useState({
     starterPriceMonthly: 5000,
+    starterPriceYearly: 50000,
     businessPriceMonthly: 10000,
     businessPriceYearly: 80000,
-    enterprisePriceMonthly: 25000
+    enterprisePriceMonthly: 25000,
+    enterprisePriceYearly: 250000
   });
 
   useEffect(() => {
@@ -40,9 +43,11 @@ export const LandingPage: React.FC = () => {
         if (data) {
           setPrices({
             starterPriceMonthly: data.starterPriceMonthly || 5000,
+            starterPriceYearly: data.starterPriceYearly || 50000,
             businessPriceMonthly: data.businessPriceMonthly || 10000,
             businessPriceYearly: data.businessPriceYearly || 80000,
-            enterprisePriceMonthly: data.enterprisePriceMonthly || 25000
+            enterprisePriceMonthly: data.enterprisePriceMonthly || 25000,
+            enterprisePriceYearly: data.enterprisePriceYearly || 250000
           });
         }
       })
@@ -187,13 +192,44 @@ export const LandingPage: React.FC = () => {
         <h2 className="section-title">Des tarifs simples et transparents</h2>
         <p className="section-subtitle">Choisissez le plan qui correspond à la taille de votre entreprise.</p>
         
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}>
+          <span style={{ fontWeight: !isYearly ? '600' : '400', color: !isYearly ? 'var(--color-primary)' : 'var(--text-secondary)' }}>Mensuel</span>
+          <div 
+            style={{ 
+              width: '60px', 
+              height: '32px', 
+              backgroundColor: 'var(--color-primary)', 
+              borderRadius: '16px',
+              position: 'relative',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s'
+            }}
+            onClick={() => setIsYearly(!isYearly)}
+          >
+            <div style={{
+              width: '26px',
+              height: '26px',
+              backgroundColor: 'white',
+              borderRadius: '50%',
+              position: 'absolute',
+              top: '3px',
+              left: isYearly ? '31px' : '3px',
+              transition: 'left 0.3s ease',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            }} />
+          </div>
+          <span style={{ fontWeight: isYearly ? '600' : '400', color: isYearly ? 'var(--color-primary)' : 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            Annuel <span style={{ backgroundColor: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>-20%</span>
+          </span>
+        </div>
+
         <div className="pricing-grid">
           {/* Starter Plan */}
           <div className="pricing-card">
             <div className="pricing-header">
               <h3 className="pricing-title">Starter</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                {prices.starterPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / mois</span>
+                {isYearly ? prices.starterPriceYearly.toLocaleString('fr-FR') : prices.starterPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / {isYearly ? 'an' : 'mois'}</span>
               </div>
               <p className="text-muted mt-2">Pour les petites boutiques</p>
             </div>
@@ -222,9 +258,9 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Business</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                {prices.businessPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / mois</span>
+                {isYearly ? prices.businessPriceYearly.toLocaleString('fr-FR') : prices.businessPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / {isYearly ? 'an' : 'mois'}</span>
               </div>
-              <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou {prices.businessPriceYearly.toLocaleString('fr-FR')} FCFA / an</p>
+              {!isYearly && <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou {prices.businessPriceYearly.toLocaleString('fr-FR')} FCFA / an</p>}
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
@@ -254,7 +290,7 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Enterprise</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                {prices.enterprisePriceMonthly.toLocaleString('fr-FR')} <span>FCFA / mois</span>
+                {isYearly ? prices.enterprisePriceYearly.toLocaleString('fr-FR') : prices.enterprisePriceMonthly.toLocaleString('fr-FR')} <span>FCFA / {isYearly ? 'an' : 'mois'}</span>
               </div>
               <p className="text-muted mt-2">Pour les grandes entreprises</p>
             </div>
