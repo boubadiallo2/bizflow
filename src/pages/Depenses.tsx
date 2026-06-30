@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, Plus, X, Lock, FileText } from 'lucide-react';
 import { Button } from '../components/Button';
-import { expensesService, settingsService } from '../services/apiService';
+import { expensesService } from '../services/apiService';
 import { showConfirm, showSuccess, showError } from '../utils/notifications';
+import { useAuth } from '../contexts/AuthContext';
 import './Depenses.css';
 
 interface ExpenseItem {
@@ -14,6 +15,7 @@ interface ExpenseItem {
 }
 
 export const Depenses: React.FC = () => {
+  const { subscription } = useAuth();
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [isEnterprise, setIsEnterprise] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -29,8 +31,7 @@ export const Depenses: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const settings = await settingsService.get();
-        if (settings?.subscription === 'Enterprise') {
+        if (subscription === 'Enterprise') {
           setIsEnterprise(true);
           const data = await expensesService.getAll();
           setExpenses(data as ExpenseItem[]);

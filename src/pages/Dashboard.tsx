@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingCart, FileText, Banknote, AlertTriangle } from 'lucide-react';
 import { Card } from '../components/Card';
 
-import { productsService, salesService, invoicesService, expensesService, settingsService } from '../services/apiService';
+import { productsService, salesService, invoicesService, expensesService } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
 import './Dashboard.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -15,6 +16,7 @@ export const Dashboard: React.FC = () => {
   const [unpaidInvoicesCount, setUnpaidInvoicesCount] = useState(0);
   const [isEnterprise, setIsEnterprise] = useState(false);
   const [todayExpenses, setTodayExpenses] = useState(0);
+  const { subscription } = useAuth();
 
   useEffect(() => {
     const loadData = async () => {
@@ -95,8 +97,7 @@ export const Dashboard: React.FC = () => {
 
       // Check Enterprise and Expenses
       try {
-          const settings = await settingsService.get();
-          if (settings?.subscription === 'Enterprise') {
+          if (subscription === 'Enterprise') {
               setIsEnterprise(true);
               const allExpenses = await expensesService.getAll();
               let expToday = 0;
