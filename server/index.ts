@@ -85,6 +85,49 @@ app.post('/api/auth/login', async (req, res) => {
       return res.json({ token, role: 'SuperAdmin', name: 'Super Administrateur' });
     }
 
+    // Demo account check and auto-provisioning
+    if (email === 'demo@nexora.sn' && password === 'demo') {
+      let demoUserArray = await db.select().from(users).where(eq(users.email, 'demo@nexora.sn'));
+      
+      if (demoUserArray.length === 0) {
+        const newTenant = await db.insert(tenants).values({
+          name: 'Demo Entreprise',
+          commerceType: 'Alimentation / Supermarché',
+          subscription: 'Enterprise',
+          status: 'Active'
+        }).returning();
+
+        const hashedPassword = await bcrypt.hash('demo', 10);
+        await db.insert(users).values({
+          tenantId: newTenant[0].id,
+          email: 'demo@nexora.sn',
+          passwordHash: hashedPassword,
+          name: 'Demo Admin',
+          role: 'Admin',
+          permissions: []
+        });
+
+        await db.insert(settings).values({
+          tenantId: newTenant[0].id,
+          name: 'Demo Entreprise',
+          ownerName: 'Demo Admin',
+          commerceType: 'Alimentation / Supermarché',
+          selectedProducts: ['Produits frais', 'Boissons', 'Épicerie'],
+          email: 'demo@nexora.sn',
+          phone: '00 000 00 00',
+          city: 'Dakar',
+          address: 'Demo Address',
+          country: 'sn',
+        });
+        
+        demoUserArray = await db.select().from(users).where(eq(users.email, 'demo@nexora.sn'));
+      }
+      
+      const demoUser = demoUserArray[0];
+      const token = jwt.sign({ userId: demoUser.id, tenantId: demoUser.tenantId, role: demoUser.role, subscription: 'Enterprise', permissions: demoUser.permissions }, JWT_SECRET, { expiresIn: '12h' });
+      return res.json({ token, role: demoUser.role, tenantId: demoUser.tenantId, name: demoUser.name, subscription: 'Enterprise', permissions: demoUser.permissions });
+    }
+
     const userArray = await db.select().from(users).where(eq(users.email, email));
     if (userArray.length === 0) {
       return res.status(401).json({ error: 'Identifiants incorrects.' });

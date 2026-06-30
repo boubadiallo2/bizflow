@@ -1,5 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
+import Swal from 'sweetalert2';
 import { 
   ShoppingCart, BarChart2, Package, CheckCircle2,
   LayoutGrid, Monitor, FileText, Users, Truck, PieChart, Settings, CreditCard
@@ -20,6 +23,25 @@ const myModules = [
 ];
 
 export const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  
+  const [isDemoLoading, setIsDemoLoading] = React.useState(false);
+
+  const handleDemoLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDemoLoading(true);
+    try {
+      const data = await authService.login({ email: 'demo@nexora.sn', password: 'demo' });
+      login(data.token, data.role, data.tenantId, data.name, data.subscription, data.permissions);
+      navigate('/app');
+    } catch (err: any) {
+      Swal.fire('Erreur', 'Impossible de se connecter au compte de démonstration.', 'error');
+    } finally {
+      setIsDemoLoading(false);
+    }
+  };
+
   return (
     <div className="landing-page">
       {/* Navbar */}
@@ -36,7 +58,9 @@ export const LandingPage: React.FC = () => {
         </div>
         <div className="landing-auth-buttons">
           <Link to="/login" className="btn-login">Connexion</Link>
-          <Link to="/register" className="btn-hero btn-hero-primary" style={{ padding: '10px 20px', fontSize: '0.95rem' }}>Essai gratuit</Link>
+          <button onClick={handleDemoLogin} disabled={isDemoLoading} className="btn-hero btn-hero-primary" style={{ padding: '10px 20px', fontSize: '0.95rem', border: 'none', cursor: 'pointer' }}>
+            {isDemoLoading ? 'Chargement...' : 'Démo en direct'}
+          </button>
         </div>
       </nav>
 
