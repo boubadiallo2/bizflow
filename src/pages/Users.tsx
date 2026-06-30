@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usersService } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
-import { Trash2, UserPlus, Shield, User } from 'lucide-react';
+import { Trash2, UserPlus, Shield, User, Edit2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface UserData {
@@ -16,6 +16,7 @@ interface UserData {
 export const Users: React.FC = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingUserId, setEditingUserId] = useState<string | number | null>(null);
   const { subscription, name: currentUserName } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -71,15 +72,37 @@ export const Users: React.FC = () => {
     }
   };
 
-  const handleAddUser = async (e: React.FormEvent) => {
+  const handleEditUserClick = (user: UserData) => {
+    setEditingUserId(user.id);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      password: '',
+      role: user.role,
+      permissions: user.permissions || []
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUserId(null);
+    setFormData({ name: '', email: '', password: '', role: 'Utilisateur', permissions: [] });
+  };
+
+  const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await usersService.add(formData);
-      Swal.fire('Succès', 'Utilisateur créé avec succès', 'success');
+      if (editingUserId) {
+        await usersService.update(editingUserId, formData);
+        Swal.fire('Succès', 'Utilisateur modifié avec succès', 'success');
+      } else {
+        await usersService.add(formData);
+        Swal.fire('Succès', 'Utilisateur créé avec succès', 'success');
+      }
+      setEditingUserId(null);
       setFormData({ name: '', email: '', password: '', role: 'Utilisateur', permissions: [] });
       fetchUsers();
     } catch (err: any) {
-      Swal.fire('Erreur', err.message || 'Impossible de créer l\'utilisateur', 'error');
+      Swal.fire('Erreur', err.message || 'Action impossible', 'error');
     }
   };
 
@@ -153,9 +176,14 @@ export const Users: React.FC = () => {
                   )}
                 </div>
                 {user.name !== currentUserName && (
-                  <button className="btn-icon btn-delete" onClick={() => handleDeleteUser(user.id, user.name)} title="Supprimer" style={{ padding: '0.5rem', color: 'var(--color-error)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                    <Trash2 size={20} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn-icon btn-edit" onClick={() => handleEditUserClick(user)} title="Modifier" style={{ padding: '0.5rem', color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      <Edit2 size={20} />
+                    </button>
+                    <button className="btn-icon btn-delete" onClick={() => handleDeleteUser(user.id, user.name)} title="Supprimer" style={{ padding: '0.5rem', color: 'var(--color-error)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -164,16 +192,16 @@ export const Users: React.FC = () => {
 
         <div className="add-user-card" style={{ flex: '1 1 30%', minWidth: '280px', backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', alignSelf: 'flex-start' }}>
           <h2 className="section-title" style={{ fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <UserPlus size={20} className="text-primary" />
-            Ajouter un utilisateur
+            {editingUserId ? <Edit2 size={20} className="text-primary" /> : <UserPlus size={20} className="text-primary" />}
+            {editingUserId ? 'Modifier l\'utilisateur' : 'Ajouter un utilisateur'}
           </h2>
-          {!canAddMore ? (
+          {!canAddMore && !editingUserId ? (
             <div className="alert-limit" style={{ padding: '1rem', backgroundColor: 'rgba(var(--color-error-rgb), 0.1)', color: 'var(--color-error)', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>
               <p style={{ margin: 0 }}>Vous avez atteint la limite d'utilisateurs pour votre abonnement {subscription}.</p>
               <p style={{ margin: '0.5rem 0 0 0' }}>Veuillez passer au forfait supérieur pour en ajouter d'autres.</p>
             </div>
           ) : (
-            <form onSubmit={handleAddUser} className="add-user-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmitForm} className="add-user-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <label style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>Nom complet</label>
                 <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Ex: Jean Dupont" className="form-input" style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }} />
@@ -184,7 +212,7 @@ export const Users: React.FC = () => {
               </div>
               <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <label style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>Mot de passe</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange} required placeholder="••••••••" className="form-input" style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }} />
+                <input type="password" name="password" value={formData.password} onChange={handleChange} required={!editingUserId} placeholder={editingUserId ? "•••••••• (Laisser vide pour ne pas modifier)" : "••••••••"} className="form-input" style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }} />
               </div>
               <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <label style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>Rôle</label>
@@ -214,7 +242,16 @@ export const Users: React.FC = () => {
                 </div>
               )}
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '0.75rem', fontSize: '1rem', fontWeight: '500' }}>Créer l'utilisateur</button>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', fontWeight: '500' }}>
+                  {editingUserId ? 'Enregistrer' : 'Créer l\'utilisateur'}
+                </button>
+                {editingUserId && (
+                  <button type="button" onClick={handleCancelEdit} className="btn" style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', fontWeight: '500', backgroundColor: '#e2e8f0', color: '#475569', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
+                    Annuler
+                  </button>
+                )}
+              </div>
             </form>
           )}
         </div>

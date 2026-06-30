@@ -172,6 +172,7 @@ export const settingsService = {
 export const usersService = {
   getAll: () => getAll<any>('users'),
   add: (data: any) => add('users', data),
+  update: (id: string | number, data: any) => update('users', id, data),
   remove: (id: string | number) => remove('users', id),
 };
 

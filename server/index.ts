@@ -251,6 +251,54 @@ app.post('/api/users', authenticateToken, requireTenant, async (req, res) => {
   }
 });
 
+app.put('/api/users/:id', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    if (req.user!.role !== 'Admin') {
+      return res.status(403).json({ error: 'Accès refusé. Seul un administrateur peut gérer les utilisateurs.' });
+    }
+    
+    const id = parseInt(req.params.id);
+    const tenantId = req.user!.tenantId!;
+    const { email, name, password, role, permissions } = req.body;
+    
+    // Vérifier si l'email existe déjà pour un AUTRE utilisateur
+    const existingUsers = await db.select().from(users).where(eq(users.email, email));
+    if (existingUsers.length > 0 && existingUsers[0].id !== id) {
+      return res.status(400).json({ error: 'Un utilisateur avec cet email existe déjà.' });
+    }
+    
+    const updateData: any = {
+      email,
+      name,
+      role: role || 'Utilisateur',
+      permissions: permissions || [],
+    };
+
+    if (password && password.trim() !== '') {
+      updateData.passwordHash = await bcrypt.hash(password, 10);
+    }
+    
+    const updatedUser = await db.update(users)
+      .set(updateData)
+      .where(and(eq(users.id, id), eq(users.tenantId, tenantId)))
+      .returning({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        permissions: users.permissions
+      });
+      
+    if (updatedUser.length === 0) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+    
+    res.json(updatedUser[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/users/:id', authenticateToken, requireTenant, async (req, res) => {
   try {
     if (req.user!.role !== 'Admin') {
