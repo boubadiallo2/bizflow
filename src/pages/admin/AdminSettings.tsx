@@ -186,20 +186,6 @@ export const AdminSettings: React.FC = () => {
                 </div>
               </div>
 
-              <div className="settings-card">
-                <h3>Paramètres Généraux</h3>
-                <div className="form-group">
-                  <label>Jours d'essai gratuit (tous les plans)</label>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    name="trialDays"
-                    value={settings.trialDays}
-                    onChange={handleChange}
-                    style={{ maxWidth: '200px' }}
-                  />
-                </div>
-              </div>
             </div>
           )}
 
