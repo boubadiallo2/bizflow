@@ -68,7 +68,7 @@ export const Abonnement: React.FC = () => {
             icon: <Rocket size={28} className="text-primary" />,
             color: 'text-primary',
             freq: freqText,
-            features: ['Produits illimités', 'Clients illimités', 'Transactions illimitées', 'Multi-utilisateurs', 'POS avancé', 'Export PDF & Rapports complets']
+            features: ['Produits illimités', 'Clients illimités', 'Transactions illimitées', 'Multi-utilisateurs (5 max)', 'POS avancé', 'Export PDF & Rapports complets']
           });
         } else if (sub === 'Enterprise') {
           setPlan({
@@ -76,7 +76,7 @@ export const Abonnement: React.FC = () => {
             icon: <Crown size={28} style={{ color: '#f59e0b' }} />,
             color: 'text-warning',
             freq: freqText,
-            features: ['Toutes les fonctions Business', 'Gestion des Dépenses', 'Support Prioritaire', 'Sauvegardes Avancées']
+            features: ['Toutes les fonctions Business', 'Gestion des Dépenses', 'Support Prioritaire', 'Utilisateurs illimités']
           });
         }
       } catch (e) {

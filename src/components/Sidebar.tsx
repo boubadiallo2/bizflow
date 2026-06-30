@@ -8,6 +8,7 @@ import {
   FileText, 
   Package, 
   Users, 
+  UserCog,
   Truck, 
   PieChart, 
   CreditCard, 
@@ -33,6 +34,7 @@ const navItems = [
   { path: '/fournisseurs', icon: Truck, label: 'Fournisseurs', allowed: ['Business', 'Enterprise'] },
   { path: '/rapports', icon: PieChart, label: 'Rapports', allowed: ['Business', 'Enterprise'] },
   { path: '/depenses', icon: Wallet, label: 'Dépenses', allowed: ['Enterprise'] },
+  { path: '/users', icon: UserCog, label: 'Utilisateurs', allowed: ['Business', 'Enterprise'], adminOnly: true },
   { path: '/abonnement', icon: CreditCard, label: 'Abonnement', allowed: ['Starter', 'Business', 'Enterprise'] },
   { path: '/parametres', icon: Settings, label: 'Paramètres', allowed: ['Starter', 'Business', 'Enterprise'] },
 ];
@@ -45,7 +47,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCollapse }) => {
   const getLogoKey = () => `company_logo_${localStorage.getItem('nexora_tenantId') || 'default'}`;
 
-  const { subscription } = useAuth();
+  const { subscription, role } = useAuth();
   const [companyLogo, setCompanyLogo] = useState<string | null>(
     localStorage.getItem(getLogoKey())
   );
@@ -117,7 +119,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
       </div>
       
       <nav className="sidebar-nav">
-        {navItems.filter(item => item.allowed.includes(subscription || 'Starter')).map((item) => {
+        {navItems.filter(item => {
+          if (!item.allowed.includes(subscription || 'Starter')) return false;
+          if ((item as any).adminOnly && role !== 'Admin') return false;
+          return true;
+        }).map((item) => {
           const badgeValue = item.path === '/inventaire' ? (alertsCount > 0 ? alertsCount : undefined) : (item as any).badge;
           return (
           <NavLink 

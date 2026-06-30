@@ -169,6 +169,12 @@ export const settingsService = {
   save: (data: any) => add('settings', data), 
 };
 
+export const usersService = {
+  getAll: () => getAll<any>('users'),
+  add: (data: any) => add('users', data),
+  remove: (id: string | number) => remove('users', id),
+};
+
 export const adminTenantsService = {
   getAll: () => getAll<any>('admin/tenants'),
   updateStatus: (id: string | number, status: string) => fetch(`${API_URL}/admin/tenants/${id}/status`, {

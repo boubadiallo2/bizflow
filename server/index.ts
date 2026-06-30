@@ -183,6 +183,89 @@ app.delete('/api/products/:id', authenticateToken, requireTenant, async (req, re
   }
 });
 
+// --- USERS ---
+app.get('/api/users', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    if (req.user!.role !== 'Admin') {
+      return res.status(403).json({ error: 'Accès refusé. Seul un administrateur peut gérer les utilisateurs.' });
+    }
+    const data = await db.select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      createdAt: users.createdAt
+    }).from(users).where(eq(users.tenantId, req.user!.tenantId!));
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/users', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    if (req.user!.role !== 'Admin') {
+      return res.status(403).json({ error: 'Accès refusé. Seul un administrateur peut gérer les utilisateurs.' });
+    }
+    
+    const tenantId = req.user!.tenantId!;
+    const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+    
+    if (tenant.subscription === 'Starter') {
+      return res.status(403).json({ error: 'Le plan Starter ne permet pas de créer des utilisateurs supplémentaires.' });
+    }
+    
+    const currentUsers = await db.select().from(users).where(eq(users.tenantId, tenantId));
+    
+    if (tenant.subscription === 'Business' && currentUsers.length >= 5) {
+      return res.status(403).json({ error: 'La limite de 5 utilisateurs pour le plan Business est atteinte.' });
+    }
+    
+    const { email, name, password, role } = req.body;
+    
+    const existingUsers = await db.select().from(users).where(eq(users.email, email));
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ error: 'Un utilisateur avec cet email existe déjà.' });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await db.insert(users).values({
+      tenantId,
+      email,
+      passwordHash: hashedPassword,
+      name,
+      role: role || 'Utilisateur',
+    }).returning({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role
+    });
+    
+    res.json(newUser[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/users/:id', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    if (req.user!.role !== 'Admin') {
+      return res.status(403).json({ error: 'Accès refusé.' });
+    }
+    
+    const id = parseInt(req.params.id);
+    if (id === req.user!.userId) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte.' });
+    }
+    
+    await db.delete(users).where(and(eq(users.id, id), eq(users.tenantId, req.user!.tenantId!)));
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- CLIENTS ---
 app.get('/api/clients', authenticateToken, requireTenant, async (req, res) => {
   try {

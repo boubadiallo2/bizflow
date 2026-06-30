@@ -24,6 +24,7 @@ import { Fournisseurs } from './pages/Fournisseurs';
 import { Rapports } from './pages/Rapports';
 import { Parametres } from './pages/Parametres';
 import { Depenses } from './pages/Depenses';
+import { Users } from './pages/Users';
 
 import { LandingPage } from './pages/LandingPage';
 import { TermsPage } from './pages/TermsPage';
@@ -72,6 +73,11 @@ function App() {
             <Route path="depenses" element={
               <SubscriptionGuard allowedSubscriptions={['Enterprise']}>
                 <Depenses />
+              </SubscriptionGuard>
+            } />
+            <Route path="users" element={
+              <SubscriptionGuard allowedSubscriptions={['Business', 'Enterprise']}>
+                <Users />
               </SubscriptionGuard>
             } />
             <Route path="parametres" element={<Parametres />} />
