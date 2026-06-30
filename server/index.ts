@@ -158,7 +158,23 @@ app.post('/api/auth/login', async (req, res) => {
 // --- ADMIN ROUTES ---
 app.get('/api/admin/tenants', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const data = await db.select().from(tenants);
+    const allTenants = await db.select().from(tenants);
+    const allUsers = await db.select().from(users);
+
+    const data = allTenants.map(t => {
+      const owner = allUsers.find(u => u.tenantId === t.id && u.role === 'Admin');
+      return {
+        id: t.id,
+        name: t.name,
+        owner: owner ? owner.name : 'Inconnu',
+        email: owner ? owner.email : 'N/A',
+        sector: 'Général', // Sector could be fetched if added to tenant table
+        joinDate: t.createdAt ? new Date(t.createdAt).toLocaleDateString('fr-FR') : 'Inconnue',
+        lastLogin: 'N/A',
+        transactions: 0,
+        status: t.status === 'Active' ? 'Actif' : t.status === 'Inactive' ? 'Bloqué' : t.status
+      };
+    });
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

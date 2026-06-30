@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, MoreVertical, Store, XCircle } from 'lucide-react';
+import { adminTenantsService } from '../../services/apiService';
 import './AdminClients.css';
 
 interface Locataire {
@@ -14,15 +15,9 @@ interface Locataire {
   status: 'Actif' | 'Bloqué';
 }
 
-const mockLocataires: Locataire[] = [
-  { id: 'L-101', name: 'Sow Électronique', owner: 'Amina Sow', email: 'amina.sow@example.com', sector: 'Électronique / Informatique', joinDate: '12/01/2026', lastLogin: 'Il y a 2h', transactions: 1245, status: 'Actif' },
-  { id: 'L-102', name: 'Bamba Supermarché', owner: 'Cheikh Bamba', email: 'contact@bambasuper.sn', sector: 'Alimentation / Supermarché', joinDate: '05/03/2026', lastLogin: 'Hier', transactions: 8530, status: 'Actif' },
-  { id: 'L-103', name: 'Ndiaye Pharmacie', owner: 'Fatou Ndiaye', email: 'pharmacie.ndiaye@gmail.com', sector: 'Pharmacie', joinDate: '22/04/2026', lastLogin: 'Il y a 5h', transactions: 420, status: 'Actif' },
-  { id: 'L-104', name: 'Kante Quincaillerie', owner: 'Moussa Kante', email: 'kante.quin@hotmail.com', sector: 'Quincaillerie', joinDate: '15/05/2026', lastLogin: 'Il y a 10 jours', transactions: 56, status: 'Bloqué' },
-];
-
 export const AdminClients: React.FC = () => {
-  const [locataires, setLocataires] = useState<Locataire[]>(mockLocataires);
+  const [locataires, setLocataires] = useState<Locataire[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('Tous');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -30,34 +25,42 @@ export const AdminClients: React.FC = () => {
   const [selectedLocataire, setSelectedLocataire] = useState<Locataire | null>(null);
 
   useEffect(() => {
-    const userCommerceType = localStorage.getItem('userCommerceType') || 'Autre';
-    setLocataires([
-      {
-        id: 'L-CURRENT',
-        name: `Mon ${userCommerceType}`,
-        owner: 'Boubacar Diallo (Moi)',
-        email: 'boudiallo20@gmail.com',
-        sector: userCommerceType,
-        joinDate: 'Aujourd\'hui',
-        lastLogin: 'À l\'instant',
-        transactions: 12,
-        status: 'Actif'
-      },
-      ...mockLocataires
-    ]);
+    fetchLocataires();
   }, []);
 
-  const handleToggleStatus = (id: string) => {
-    setLocataires(locataires.map(loc => {
-      if (loc.id === id) {
-        return {
-          ...loc,
-          status: loc.status === 'Actif' ? 'Bloqué' : 'Actif'
-        };
-      }
-      return loc;
-    }));
-    setActiveActionMenu(null);
+  const fetchLocataires = async () => {
+    try {
+      const data = await adminTenantsService.getAll();
+      setLocataires(data);
+    } catch (error) {
+      console.error('Failed to fetch tenants', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    try {
+      const loc = locataires.find(l => l.id === id);
+      if (!loc) return;
+      const newStatus = loc.status === 'Actif' ? 'Inactive' : 'Active';
+      await adminTenantsService.updateStatus(id, newStatus);
+      
+      setLocataires(locataires.map(l => {
+        if (l.id === id) {
+          return {
+            ...l,
+            status: newStatus === 'Active' ? 'Actif' : 'Bloqué'
+          };
+        }
+        return l;
+      }));
+    } catch (error) {
+      console.error('Failed to update tenant status', error);
+      alert('Erreur lors de la mise à jour du statut.');
+    } finally {
+      setActiveActionMenu(null);
+    }
   };
 
   const filteredLocataires = locataires.filter(loc => {
@@ -138,7 +141,11 @@ export const AdminClients: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredLocataires.length > 0 ? filteredLocataires.map(loc => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>Chargement des clients...</td>
+                </tr>
+              ) : filteredLocataires.length > 0 ? filteredLocataires.map(loc => (
                 <tr key={loc.id}>
                   <td>
                     <div className="tenant-info">
