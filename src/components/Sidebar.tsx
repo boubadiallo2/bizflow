@@ -110,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
         </div>
         {!isCollapsed && (
           <div className="brand-text">
-            <h1>Nexora</h1>
+            <img src="/logo.png" alt="Nexora" style={{ height: '28px', marginBottom: '4px' }} />
             <p>ERP pour PME</p>
           </div>
         )}

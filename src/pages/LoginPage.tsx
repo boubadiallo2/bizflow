@@ -42,11 +42,8 @@ export const LoginPage: React.FC = () => {
       </Link>
       <div className="login-card">
         <div className="login-header">
-          <Link to="/" className="login-brand" style={{ textDecoration: 'none' }}>
-            <div className="login-brand-icon">
-              <Store size={28} />
-            </div>
-            <h1>Nexora</h1>
+          <Link to="/" className="login-brand" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+            <img src="/logo.png" alt="Nexora" style={{ height: '48px' }} />
           </Link>
           <h2 className="login-title">Bon retour !</h2>
           <p className="login-subtitle">Connectez-vous à votre compte</p>

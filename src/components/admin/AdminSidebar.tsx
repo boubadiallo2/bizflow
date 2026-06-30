@@ -11,7 +11,7 @@ export const AdminSidebar: React.FC = () => {
             <ShieldAlert size={24} color="white" />
           </div>
           <div className="admin-brand-text">
-            <h1>Nexora</h1>
+            <img src="/logo.png" alt="Nexora" style={{ height: '28px', marginBottom: '4px' }} />
             <span>SUPER ADMIN</span>
           </div>
         </div>

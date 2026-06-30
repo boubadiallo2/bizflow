@@ -130,11 +130,8 @@ export const RegisterPage: React.FC = () => {
       </Link>
       <div className="register-card">
         <div className="register-header">
-          <Link to="/" className="register-brand" style={{ textDecoration: 'none' }}>
-            <div className="register-brand-icon">
-              <Store size={28} />
-            </div>
-            <h1>Nexora</h1>
+          <Link to="/" className="register-brand" style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+            <img src="/logo.png" alt="Nexora" style={{ height: '48px' }} />
           </Link>
           <h2 className="register-title">Créez votre compte</h2>
           <p className="register-subtitle">Commencez à gérer votre entreprise dès aujourd'hui</p>

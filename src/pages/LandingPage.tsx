@@ -25,10 +25,7 @@ export const LandingPage: React.FC = () => {
       {/* Navbar */}
       <nav className="landing-navbar">
         <div className="landing-brand">
-          <div className="landing-brand-icon">
-            <Store size={24} />
-          </div>
-          <h1>Nexora</h1>
+          <img src="/logo.png" alt="Nexora" style={{ height: '40px' }} />
         </div>
         <div className="landing-nav-links">
           <a href="#modules" className="landing-nav-link">Modules</a>
@@ -244,8 +241,7 @@ export const LandingPage: React.FC = () => {
       <footer className="landing-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <Store size={24} />
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Nexora</h2>
+            <img src="/logo.png" alt="Nexora" style={{ height: '32px' }} />
           </div>
           <div className="footer-links">
             <a href="#">Conditions générales</a>
