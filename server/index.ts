@@ -172,6 +172,7 @@ app.get('/api/admin/tenants', authenticateToken, requireAdmin, async (req, res) 
         joinDate: t.createdAt ? new Date(t.createdAt).toLocaleDateString('fr-FR') : 'Inconnue',
         lastLogin: 'N/A',
         transactions: 0,
+        subscription: t.subscription || 'Starter',
         status: t.status === 'Active' ? 'Actif' : t.status === 'Inactive' ? 'Bloqué' : t.status
       };
     });

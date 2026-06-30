@@ -9,8 +9,8 @@ interface TenantSub {
   name: string;
   ownerName?: string;
   email?: string;
-  subscription: 'Starter' | 'Pro';
-  status: 'Actif' | 'Suspendu';
+  subscription: string;
+  status: string;
   amount?: number;
   nextBilling?: string;
 }
@@ -30,13 +30,22 @@ export const AdminAbonnements: React.FC = () => {
   const loadTenants = async () => {
     try {
       const data = await adminTenantsService.getAll();
-      setSubs(data.map((t: any) => ({
-        ...t,
-        amount: t.subscription === 'Pro' ? 15000 : 0,
-        nextBilling: t.subscription === 'Pro' ? 'Mensuel' : 'Jamais',
-        ownerName: 'Propriétaire', // Ideally we'd join with the users table or settings
-        email: 'contact@' + t.name.replace(/\s+/g, '').toLowerCase() + '.com'
-      })));
+      setSubs(data.map((t: any) => {
+        let amount = 0;
+        let nextBilling = 'Mensuel';
+        if (t.subscription === 'Starter') { amount = 5000; }
+        else if (t.subscription === 'Business' || t.subscription === 'Pro') { amount = 10000; }
+        else if (t.subscription === 'Enterprise') { amount = 25000; }
+
+        return {
+          ...t,
+          subscription: t.subscription || 'Starter',
+          amount,
+          nextBilling,
+          ownerName: t.owner || 'Propriétaire', 
+          email: t.email || 'contact@' + t.name.replace(/\s+/g, '').toLowerCase() + '.com'
+        };
+      }));
     } catch (e) {
       console.error(e);
     }
@@ -60,10 +69,11 @@ export const AdminAbonnements: React.FC = () => {
     const matchesSearch = sub.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     let matchesFilter = true;
-    if (activeFilter === 'Pro') matchesFilter = sub.subscription === 'Pro';
+    if (activeFilter === 'Business') matchesFilter = sub.subscription === 'Business';
+    if (activeFilter === 'Enterprise') matchesFilter = sub.subscription === 'Enterprise';
     if (activeFilter === 'Starter') matchesFilter = sub.subscription === 'Starter';
-    if (activeFilter === 'Actifs') matchesFilter = sub.status === 'Actif';
-    if (activeFilter === 'Suspendus') matchesFilter = sub.status === 'Suspendu';
+    if (activeFilter === 'Actifs') matchesFilter = sub.status === 'Actif' || sub.status === 'Active';
+    if (activeFilter === 'Suspendus') matchesFilter = sub.status === 'Suspendu' || sub.status === 'Bloqué' || sub.status === 'Inactive';
 
     return matchesSearch && matchesFilter;
   });
@@ -101,7 +111,7 @@ export const AdminAbonnements: React.FC = () => {
             </button>
             {isFilterOpen && (
               <div className="admin-filter-dropdown">
-                {['Tous', 'Pro', 'Starter', 'Actifs', 'Suspendus'].map(f => (
+                {['Tous', 'Starter', 'Business', 'Enterprise', 'Actifs', 'Suspendus'].map(f => (
                   <div 
                     key={f} 
                     className={`admin-filter-option ${activeFilter === f ? 'selected' : ''}`}
@@ -137,12 +147,12 @@ export const AdminAbonnements: React.FC = () => {
                     </div>
                   </td>
                   <td>
-                    <span className={`plan-badge ${sub.subscription.toLowerCase()}`}>{sub.subscription}</span>
+                    <span className={`plan-badge ${(sub.subscription || 'Starter').toLowerCase()}`}>{sub.subscription || 'Starter'}</span>
                   </td>
                   <td>
-                    <span className={`status-badge ${sub.status.toLowerCase()}`}>
-                      {sub.status === 'Actif' ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                      {sub.status}
+                    <span className={`status-badge ${(sub.status || '').toLowerCase()}`}>
+                      {(sub.status === 'Actif' || sub.status === 'Active') ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                      {sub.status === 'Active' ? 'Actif' : sub.status === 'Inactive' ? 'Bloqué' : sub.status}
                     </span>
                   </td>
                   <td className="mrr-cell">{(sub.amount && sub.amount > 0) ? `${sub.amount.toLocaleString('fr-FR')} F` : '-'}</td>
