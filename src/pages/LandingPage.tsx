@@ -54,16 +54,7 @@ export const LandingPage: React.FC = () => {
           <a href="#features" className="btn-hero btn-hero-secondary">Découvrir les avantages</a>
         </div>
 
-        <div className="hero-video-container">
-          <video 
-            controls 
-            poster="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
-            className="hero-video"
-          >
-            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-            Votre navigateur ne supporte pas la balise vidéo.
-          </video>
-        </div>
+
       </section>
 
       {/* Modules Section (NEW) */}
