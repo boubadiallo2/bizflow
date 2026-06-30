@@ -67,8 +67,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
       try {
         const settings = await settingsService.get();
         if (settings) {
-          if (settings.companyName) {
-            setCompanyName(settings.companyName);
+          if (settings.name) {
+            setCompanyName(settings.name);
           }
           if (settings.logo) {
             setCompanyLogo(settings.logo);
