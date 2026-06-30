@@ -16,6 +16,7 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   role: varchar('role', { length: 50 }).default('Admin'),
+  permissions: jsonb('permissions'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

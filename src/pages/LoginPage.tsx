@@ -20,7 +20,7 @@ export const LoginPage: React.FC = () => {
     
     try {
       const data = await authService.login({ email, password });
-      login(data.token, data.role, data.tenantId, data.name, data.subscription);
+      login(data.token, data.role, data.tenantId, data.name, data.subscription, data.permissions);
       
       if (data.role === 'SuperAdmin') {
         navigate('/admin/dashboard');

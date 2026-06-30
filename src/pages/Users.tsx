@@ -9,6 +9,7 @@ interface UserData {
   name: string;
   email: string;
   role: string;
+  permissions?: string[];
   createdAt: string;
 }
 
@@ -21,8 +22,24 @@ export const Users: React.FC = () => {
     name: '',
     email: '',
     password: '',
-    role: 'Utilisateur'
+    role: 'Utilisateur',
+    permissions: [] as string[]
   });
+
+  const availableModules = [
+    { id: '/dashboard', label: 'Tableau de bord' },
+    { id: '/ventes', label: 'Ventes' },
+    { id: '/devis', label: 'Devis' },
+    { id: '/pos', label: 'Point de vente' },
+    { id: '/facturation', label: 'Facturation' },
+    { id: '/inventaire', label: 'Inventaire' },
+    { id: '/clients', label: 'Clients' },
+    { id: '/fournisseurs', label: 'Fournisseurs' },
+    { id: '/rapports', label: 'Rapports' },
+    { id: '/depenses', label: 'Dépenses' },
+    { id: '/abonnement', label: 'Abonnement' },
+    { id: '/parametres', label: 'Paramètres' }
+  ];
 
   const fetchUsers = async () => {
     try {
@@ -41,7 +58,17 @@ export const Users: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'permissions') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({
+        ...prev,
+        permissions: checked 
+          ? [...prev.permissions, value] 
+          : prev.permissions.filter(p => p !== value)
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleAddUser = async (e: React.FormEvent) => {
@@ -49,7 +76,7 @@ export const Users: React.FC = () => {
     try {
       await usersService.add(formData);
       Swal.fire('Succès', 'Utilisateur créé avec succès', 'success');
-      setFormData({ name: '', email: '', password: '', role: 'Utilisateur' });
+      setFormData({ name: '', email: '', password: '', role: 'Utilisateur', permissions: [] });
       fetchUsers();
     } catch (err: any) {
       Swal.fire('Erreur', err.message || 'Impossible de créer l\'utilisateur', 'error');
@@ -115,6 +142,15 @@ export const Users: React.FC = () => {
                   <span className={`role-badge ${user.role === 'Admin' ? 'admin' : 'user'}`} style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '1rem', backgroundColor: user.role === 'Admin' ? 'rgba(var(--color-primary-rgb), 0.1)' : 'rgba(var(--color-secondary-rgb), 0.1)', color: user.role === 'Admin' ? 'var(--color-primary)' : 'var(--color-secondary)' }}>
                     {user.role}
                   </span>
+                  {user.role === 'Utilisateur' && user.permissions && (
+                    <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                      {user.permissions.map((p: string) => (
+                        <span key={p} style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '4px' }}>
+                          {availableModules.find(m => m.id === p)?.label || p}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {user.name !== currentUserName && (
                   <button className="btn-icon btn-delete" onClick={() => handleDeleteUser(user.id, user.name)} title="Supprimer" style={{ padding: '0.5rem', color: 'var(--color-error)', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -157,7 +193,28 @@ export const Users: React.FC = () => {
                   <option value="Admin">Administrateur</option>
                 </select>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>Créer l'utilisateur</button>
+              
+              {formData.role === 'Utilisateur' && (
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--color-text)' }}>Accès aux modules :</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    {availableModules.map(mod => (
+                      <label key={mod.id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
+                        <input
+                          type="checkbox"
+                          name="permissions"
+                          value={mod.id}
+                          checked={formData.permissions.includes(mod.id)}
+                          onChange={handleChange}
+                        />
+                        {mod.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '0.75rem', fontSize: '1rem', fontWeight: '500' }}>Créer l'utilisateur</button>
             </form>
           )}
         </div>

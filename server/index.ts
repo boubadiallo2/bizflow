@@ -104,8 +104,8 @@ app.post('/api/auth/login', async (req, res) => {
       }
     }
 
-    const token = jwt.sign({ userId: user.id, tenantId: user.tenantId, role: user.role, subscription }, JWT_SECRET, { expiresIn: '12h' });
-    res.json({ token, role: user.role, tenantId: user.tenantId, name: user.name, subscription });
+    const token = jwt.sign({ userId: user.id, tenantId: user.tenantId, role: user.role, subscription, permissions: user.permissions }, JWT_SECRET, { expiresIn: '12h' });
+    res.json({ token, role: user.role, tenantId: user.tenantId, name: user.name, subscription, permissions: user.permissions });
 
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -194,6 +194,7 @@ app.get('/api/users', authenticateToken, requireTenant, async (req, res) => {
       name: users.name,
       email: users.email,
       role: users.role,
+      permissions: users.permissions,
       createdAt: users.createdAt
     }).from(users).where(eq(users.tenantId, req.user!.tenantId!));
     res.json(data);
@@ -221,7 +222,7 @@ app.post('/api/users', authenticateToken, requireTenant, async (req, res) => {
       return res.status(403).json({ error: 'La limite de 5 utilisateurs pour le plan Business est atteinte.' });
     }
     
-    const { email, name, password, role } = req.body;
+    const { email, name, password, role, permissions } = req.body;
     
     const existingUsers = await db.select().from(users).where(eq(users.email, email));
     if (existingUsers.length > 0) {
@@ -235,11 +236,13 @@ app.post('/api/users', authenticateToken, requireTenant, async (req, res) => {
       passwordHash: hashedPassword,
       name,
       role: role || 'Utilisateur',
+      permissions: permissions || [],
     }).returning({
       id: users.id,
       name: users.name,
       email: users.email,
-      role: users.role
+      role: users.role,
+      permissions: users.permissions
     });
     
     res.json(newUser[0]);

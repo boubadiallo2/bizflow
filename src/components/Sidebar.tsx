@@ -47,7 +47,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCollapse }) => {
   const getLogoKey = () => `company_logo_${localStorage.getItem('nexora_tenantId') || 'default'}`;
 
-  const { subscription, role } = useAuth();
+  const { subscription, role, permissions } = useAuth();
   const [companyLogo, setCompanyLogo] = useState<string | null>(
     localStorage.getItem(getLogoKey())
   );
@@ -122,6 +122,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed = false, toggleCol
         {navItems.filter(item => {
           if (!item.allowed.includes(subscription || 'Starter')) return false;
           if ((item as any).adminOnly && role !== 'Admin') return false;
+          
+          // Vérification des permissions spécifiques pour les Utilisateurs standards
+          // On laisse toujours l'accès à "app" (Accueil)
+          if (role === 'Utilisateur' && item.path !== '/app') {
+            if (!permissions || !permissions.includes(item.path)) {
+              return false;
+            }
+          }
+          
           return true;
         }).map((item) => {
           const badgeValue = item.path === '/inventaire' ? (alertsCount > 0 ? alertsCount : undefined) : (item as any).badge;
