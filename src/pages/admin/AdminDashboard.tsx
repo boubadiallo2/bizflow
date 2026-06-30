@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, CreditCard, Building2, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { adminTenantsService } from '../../services/apiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './AdminDashboard.css';
 
@@ -13,15 +14,30 @@ const mockRevenueData = [
   { name: 'Juin', value: 580000 },
 ];
 
-const mockRecentClients = [
-  { id: 1, name: 'Diallo Boutique', owner: 'Boubacar Diallo', plan: 'Pro', date: 'Il y a 2h', initial: 'DB' },
-  { id: 2, name: 'Sow Électronique', owner: 'Amina Sow', plan: 'Starter', date: 'Il y a 5h', initial: 'SE' },
-  { id: 3, name: 'Bamba Supermarché', owner: 'Cheikh Bamba', plan: 'Pro', date: 'Hier', initial: 'BS' },
-  { id: 4, name: 'Ndiaye Pharmacie', owner: 'Fatou Ndiaye', plan: 'Pro', date: 'Hier', initial: 'NP' },
-];
-
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    mrr: 0,
+    activeClients: 0,
+    proSubscriptions: 0,
+    totalUsers: 0,
+    recentClients: [] as any[]
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await adminTenantsService.getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="admin-dashboard-container">
@@ -38,10 +54,10 @@ export const AdminDashboard: React.FC = () => {
               <TrendingUp size={24} />
             </div>
           </div>
-          <div className="admin-kpi-value">580 000 F</div>
+          <div className="admin-kpi-value">{loading ? '...' : `${stats.mrr.toLocaleString('fr-FR')} F`}</div>
           <div className="admin-kpi-trend positive">
             <ArrowUpRight size={16} />
-            <span>+38% ce mois-ci</span>
+            <span>Basé sur abonnements actifs</span>
           </div>
         </div>
 
@@ -52,10 +68,10 @@ export const AdminDashboard: React.FC = () => {
               <Building2 size={24} />
             </div>
           </div>
-          <div className="admin-kpi-value">124</div>
+          <div className="admin-kpi-value">{loading ? '...' : stats.activeClients}</div>
           <div className="admin-kpi-trend positive">
             <ArrowUpRight size={16} />
-            <span>+12 nouveaux clients</span>
+            <span>Entreprises créées</span>
           </div>
         </div>
 
@@ -66,10 +82,10 @@ export const AdminDashboard: React.FC = () => {
               <CreditCard size={24} />
             </div>
           </div>
-          <div className="admin-kpi-value">38</div>
+          <div className="admin-kpi-value">{loading ? '...' : stats.proSubscriptions}</div>
           <div className="admin-kpi-trend neutral">
             <ArrowUpRight size={16} />
-            <span>30% des clients</span>
+            <span>Pro & Enterprise</span>
           </div>
         </div>
 
@@ -80,10 +96,10 @@ export const AdminDashboard: React.FC = () => {
               <Users size={24} />
             </div>
           </div>
-          <div className="admin-kpi-value">452</div>
+          <div className="admin-kpi-value">{loading ? '...' : stats.totalUsers}</div>
           <div className="admin-kpi-trend positive">
             <ArrowUpRight size={16} />
-            <span>+45 cette semaine</span>
+            <span>Inscrits sur la plateforme</span>
           </div>
         </div>
       </div>
@@ -120,23 +136,29 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </div>
           <div className="admin-recent-list">
-            {mockRecentClients.map(client => (
-              <div key={client.id} className="admin-recent-item">
-                <div className="admin-recent-info">
-                  <div className="admin-recent-avatar">{client.initial}</div>
-                  <div className="admin-recent-details">
-                    <h4>{client.name}</h4>
-                    <p>{client.owner}</p>
+            {loading ? (
+              <p style={{ padding: '1rem', color: '#6b7280' }}>Chargement des clients...</p>
+            ) : stats.recentClients.length === 0 ? (
+              <p style={{ padding: '1rem', color: '#6b7280' }}>Aucun client récent</p>
+            ) : (
+              stats.recentClients.map((client: any) => (
+                <div key={client.id} className="admin-recent-item">
+                  <div className="admin-recent-info">
+                    <div className="admin-recent-avatar">{client.initial}</div>
+                    <div className="admin-recent-details">
+                      <h4>{client.name}</h4>
+                      <p>{client.owner}</p>
+                    </div>
+                  </div>
+                  <div className="admin-recent-plan">
+                    <span className={`admin-plan-badge ${client.plan.toLowerCase()}`}>
+                      {client.plan}
+                    </span>
+                    <div className="admin-recent-date">{client.date}</div>
                   </div>
                 </div>
-                <div className="admin-recent-plan">
-                  <span className={`admin-plan-badge ${client.plan.toLowerCase()}`}>
-                    {client.plan}
-                  </span>
-                  <div className="admin-recent-date">{client.date}</div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

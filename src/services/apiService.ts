@@ -178,6 +178,7 @@ export const usersService = {
 
 export const adminTenantsService = {
   getAll: () => getAll<any>('admin/tenants'),
+  getDashboardStats: () => fetch(`${API_URL}/admin/dashboard-stats`, { headers: getAuthHeaders() }).then(handleResponse),
   updateStatus: (id: string | number, status: string) => fetch(`${API_URL}/admin/tenants/${id}/status`, {
     method: 'PUT',
     headers: getAuthHeaders(),

@@ -165,6 +165,57 @@ app.get('/api/admin/tenants', authenticateToken, requireAdmin, async (req, res) 
   }
 });
 
+app.get('/api/admin/dashboard-stats', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const allTenants = await db.select().from(tenants);
+    const allUsers = await db.select().from(users);
+    
+    // MRR calculation
+    let mrr = 0;
+    const activeTenants = allTenants.filter(t => t.status === 'Active' || t.status === 'Actif');
+    
+    activeTenants.forEach(t => {
+      if (t.subscription === 'Starter') mrr += 5000;
+      else if (t.subscription === 'Business' || t.subscription === 'Pro') mrr += 10000;
+      else if (t.subscription === 'Enterprise') mrr += 25000;
+    });
+
+    // Subscriptions
+    const proSubscriptions = activeTenants.filter(t => t.subscription === 'Business' || t.subscription === 'Pro' || t.subscription === 'Enterprise').length;
+    
+    // Recent clients (last 4)
+    const recentClients = allTenants
+      .sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 4)
+      .map(t => {
+        // Find owner
+        const owner = allUsers.find(u => u.tenantId === t.id && u.role === 'Admin');
+        return {
+          id: t.id,
+          name: t.name,
+          owner: owner ? owner.name : 'Inconnu',
+          plan: t.subscription || 'Starter',
+          date: t.createdAt ? new Date(t.createdAt).toLocaleDateString('fr-FR') : 'Inconnue',
+          initial: t.name.substring(0, 2).toUpperCase()
+        };
+      });
+
+    res.json({
+      mrr,
+      activeClients: activeTenants.length,
+      proSubscriptions,
+      totalUsers: allUsers.length,
+      recentClients
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put('/api/admin/tenants/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
