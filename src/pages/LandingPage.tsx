@@ -166,7 +166,7 @@ export const LandingPage: React.FC = () => {
                 <span>500 transactions/mois</span>
               </div>
             </div>
-            <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
+            <Link to="/register?plan=Starter" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
               S'abonner
             </Link>
           </div>
@@ -199,7 +199,7 @@ export const LandingPage: React.FC = () => {
                 <span>Export PDF & Devis</span>
               </div>
             </div>
-            <Link to="/register" className="btn-hero btn-hero-primary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
+            <Link to="/register?plan=Business" className="btn-hero btn-hero-primary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
               S'abonner
             </Link>
           </div>
@@ -231,7 +231,7 @@ export const LandingPage: React.FC = () => {
                 <span>Accès API</span>
               </div>
             </div>
-            <Link to="/register" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
+            <Link to="/register?plan=Enterprise" className="btn-hero btn-hero-secondary" style={{ width: '100%', display: 'block', textAlign: 'center', boxSizing: 'border-box' }}>
               S'abonner
             </Link>
           </div>

@@ -21,6 +21,8 @@ export const RegisterPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(window.location.search);
+  const selectedPlan = searchParams.get('plan') || 'Starter';
 
   const commerceOptions: Record<string, string[]> = {
     'Alimentation / Supermarché': ['Produits frais', 'Boissons', 'Épicerie', 'Surgelés', 'Boulangerie'],
@@ -112,7 +114,8 @@ export const RegisterPage: React.FC = () => {
         address: formData.address,
         country: formData.country,
         selectedProducts: formData.selectedProducts,
-        paymentMethod: method
+        paymentMethod: method,
+        subscription: selectedPlan
       });
       navigate('/login');
     } catch (err: any) {
