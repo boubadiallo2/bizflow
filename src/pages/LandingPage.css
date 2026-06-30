@@ -442,11 +442,35 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .landing-navbar {
+    padding: 1rem 4%;
+  }
+  .landing-brand h1 {
+    font-size: 1.2rem;
+  }
+  .landing-brand {
+    gap: 8px;
+  }
   .landing-nav-links {
     display: none;
   }
+  .landing-auth-buttons {
+    gap: 10px;
+  }
+  .btn-login {
+    font-size: 0.9rem;
+  }
+  .landing-auth-buttons .btn-hero-primary {
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+  }
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+  }
+  .hero-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 24px;
   }
   .hero-cta {
     flex-direction: column;
@@ -454,5 +478,17 @@
   .footer-content {
     flex-direction: column;
     gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-navbar {
+    padding: 0.8rem 3%;
+  }
+  .landing-brand h1 {
+    display: none; /* Hide brand text on very small screens to make room for buttons */
+  }
+  .landing-auth-buttons {
+    gap: 8px;
   }
 }
