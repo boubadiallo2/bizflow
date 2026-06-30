@@ -36,11 +36,21 @@ export const Abonnement: React.FC = () => {
             sector: 'Secteur non défini'
           });
         }
+        let freqText = 'Mensuel';
         if (data?.tenantCreatedAt) {
           const createdAt = new Date(data.tenantCreatedAt);
           const nextMonth = new Date(createdAt);
           nextMonth.setMonth(nextMonth.getMonth() + 1);
           setRenewalDate(nextMonth.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }));
+          
+          const now = new Date();
+          const diffTime = nextMonth.getTime() - now.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          if (diffDays > 0) {
+            freqText = `Mensuel (${diffDays} jours restants)`;
+          } else {
+            freqText = `Expiré`;
+          }
         }
 
         const sub = data?.tenantSubscription || 'Starter';
@@ -49,7 +59,7 @@ export const Abonnement: React.FC = () => {
             name: 'Plan Starter',
             icon: <Sprout size={28} className="text-success" />,
             color: 'text-success',
-            freq: 'Mensuel',
+            freq: freqText,
             features: ['Jusqu\'à 20 produits', '50 clients maximum', '100 transactions/mois', '1 utilisateur', 'POS basique', 'Rapports simples']
           });
         } else if (sub === 'Business') {
@@ -57,7 +67,7 @@ export const Abonnement: React.FC = () => {
             name: 'Plan Business',
             icon: <Rocket size={28} className="text-primary" />,
             color: 'text-primary',
-            freq: 'Mensuel',
+            freq: freqText,
             features: ['Produits illimités', 'Clients illimités', 'Transactions illimitées', 'Multi-utilisateurs', 'POS avancé', 'Export PDF & Rapports complets']
           });
         } else if (sub === 'Enterprise') {
@@ -65,7 +75,7 @@ export const Abonnement: React.FC = () => {
             name: 'Plan Enterprise',
             icon: <Crown size={28} style={{ color: '#f59e0b' }} />,
             color: 'text-warning',
-            freq: 'Mensuel',
+            freq: freqText,
             features: ['Toutes les fonctions Business', 'Gestion des Dépenses', 'Support Prioritaire', 'Sauvegardes Avancées']
           });
         }
