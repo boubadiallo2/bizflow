@@ -140,6 +140,35 @@
   gap: 20px;
 }
 
+/* Hero Video */
+.hero-video-container {
+  margin-top: 60px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(20, 184, 133, 0.2); /* var(--color-primary) */
+  background: #000;
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-video-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 60px rgba(20, 184, 133, 0.25);
+}
+
+.hero-video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+}
+
 /* Sections */
 .features-section, .pricing-section, .modules-section {
   padding: 40px 5%;
