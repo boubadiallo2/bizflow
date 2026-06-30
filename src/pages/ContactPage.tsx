@@ -34,7 +34,7 @@ export const ContactPage: React.FC = () => {
               <h3 style={{ fontSize: '1.2rem', margin: 0 }}>Email</h3>
             </div>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Support client & technique :</p>
-            <a href="mailto:support@nexora-erp.com" style={{ color: 'var(--color-primary)', fontWeight: 'bold', textDecoration: 'none' }}>support@nexora-erp.com</a>
+            <a href="mailto:Boudiallo20@gmail.com" style={{ color: 'var(--color-primary)', fontWeight: 'bold', textDecoration: 'none' }}>Boudiallo20@gmail.com</a>
           </div>
 
           <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
@@ -45,7 +45,7 @@ export const ContactPage: React.FC = () => {
               <h3 style={{ fontSize: '1.2rem', margin: 0 }}>Téléphone</h3>
             </div>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Du lundi au vendredi, de 9h à 18h :</p>
-            <a href="tel:+221770000000" style={{ color: 'var(--color-success)', fontWeight: 'bold', textDecoration: 'none' }}>+221 77 000 00 00</a>
+            <a href="tel:+221761439381" style={{ color: 'var(--color-success)', fontWeight: 'bold', textDecoration: 'none' }}>+221 76 143 93 81</a>
           </div>
 
           <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
