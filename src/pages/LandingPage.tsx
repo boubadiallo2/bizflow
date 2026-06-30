@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authService } from '../services/apiService';
+import { authService, platformSettingsService } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import Swal from 'sweetalert2';
 import { 
@@ -27,6 +27,27 @@ export const LandingPage: React.FC = () => {
   const { login } = useAuth();
   
   const [isDemoLoading, setIsDemoLoading] = React.useState(false);
+  const [prices, setPrices] = useState({
+    starterPriceMonthly: 5000,
+    businessPriceMonthly: 10000,
+    businessPriceYearly: 80000,
+    enterprisePriceMonthly: 25000
+  });
+
+  useEffect(() => {
+    platformSettingsService.getPublic()
+      .then(data => {
+        if (data) {
+          setPrices({
+            starterPriceMonthly: data.starterPriceMonthly || 5000,
+            businessPriceMonthly: data.businessPriceMonthly || 10000,
+            businessPriceYearly: data.businessPriceYearly || 80000,
+            enterprisePriceMonthly: data.enterprisePriceMonthly || 25000
+          });
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const handleDemoLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -172,7 +193,7 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Starter</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                5 000 <span>FCFA / mois</span>
+                {prices.starterPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / mois</span>
               </div>
               <p className="text-muted mt-2">Pour les petites boutiques</p>
             </div>
@@ -201,9 +222,9 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Business</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                10 000 <span>FCFA / mois</span>
+                {prices.businessPriceMonthly.toLocaleString('fr-FR')} <span>FCFA / mois</span>
               </div>
-              <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou 80 000 FCFA / an (4 mois gratuits)</p>
+              <p className="text-muted mt-2" style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>Ou {prices.businessPriceYearly.toLocaleString('fr-FR')} FCFA / an</p>
             </div>
             <div className="pricing-features">
               <div className="pricing-feature">
@@ -233,7 +254,7 @@ export const LandingPage: React.FC = () => {
             <div className="pricing-header">
               <h3 className="pricing-title">Enterprise</h3>
               <div className="pricing-price" style={{ fontSize: '2.5rem' }}>
-                25 000 <span>FCFA / mois</span>
+                {prices.enterprisePriceMonthly.toLocaleString('fr-FR')} <span>FCFA / mois</span>
               </div>
               <p className="text-muted mt-2">Pour les grandes entreprises</p>
             </div>

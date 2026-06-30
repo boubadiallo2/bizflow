@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, CreditCard, Shield, Globe, Bell, Server } from 'lucide-react';
 import { Button } from '../../components/Button';
+import { platformSettingsService } from '../../services/apiService';
 import './AdminSettings.css';
 
 export const AdminSettings: React.FC = () => {
@@ -8,47 +9,56 @@ export const AdminSettings: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  // Mock settings state
   const [settings, setSettings] = useState({
-    starterMonthlyPrice: 5000,
-    starterAnnualPrice: 50000,
-    businessMonthlyPrice: 10000,
-    businessAnnualPrice: 100000,
-    enterpriseMonthlyPrice: 25000,
-    enterpriseAnnualPrice: 250000,
+    starterPriceMonthly: 5000,
+    starterPriceYearly: 50000,
+    businessPriceMonthly: 10000,
+    businessPriceYearly: 80000,
+    enterprisePriceMonthly: 25000,
+    enterprisePriceYearly: 250000,
     trialDays: 14,
     waveApiKey: 'wave_live_xxxxxxxxxxxxx',
     orangeApiKey: 'om_live_xxxxxxxxxxxxx',
     maintenanceMode: false,
     platformName: 'Nexora',
     supportEmail: 'support@nexora.sn',
-    // Notifications
     notifyNewRegistration: true,
     notifyFailedPayment: true,
     notifyWeeklyReport: false,
     notifyTransactionLimit: true,
-    // Security
     require2FA: true,
     sessionTimeout: 60,
     passwordExpiryDays: 90
   });
 
+  useEffect(() => {
+    platformSettingsService.getAdmin()
+      .then(data => {
+        setSettings(prev => ({ ...prev, ...data }));
+      })
+      .catch(console.error);
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setSettings(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await platformSettingsService.updateAdmin(settings);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-    }, 800);
+    } catch (e) {
+      console.error(e);
+      alert('Erreur lors de la sauvegarde');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -116,8 +126,8 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="starterMonthlyPrice"
-                      value={settings.starterMonthlyPrice}
+                      name="starterPriceMonthly"
+                      value={settings.starterPriceMonthly}
                       onChange={handleChange}
                     />
                   </div>
@@ -126,8 +136,8 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="starterAnnualPrice"
-                      value={settings.starterAnnualPrice}
+                      name="starterPriceYearly"
+                      value={settings.starterPriceYearly}
                       onChange={handleChange}
                     />
                   </div>
@@ -142,8 +152,8 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="businessMonthlyPrice"
-                      value={settings.businessMonthlyPrice}
+                      name="businessPriceMonthly"
+                      value={settings.businessPriceMonthly}
                       onChange={handleChange}
                     />
                   </div>
@@ -152,8 +162,8 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="businessAnnualPrice"
-                      value={settings.businessAnnualPrice}
+                      name="businessPriceYearly"
+                      value={settings.businessPriceYearly}
                       onChange={handleChange}
                     />
                   </div>
@@ -168,8 +178,8 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="enterpriseMonthlyPrice"
-                      value={settings.enterpriseMonthlyPrice}
+                      name="enterprisePriceMonthly"
+                      value={settings.enterprisePriceMonthly}
                       onChange={handleChange}
                     />
                   </div>
@@ -178,8 +188,8 @@ export const AdminSettings: React.FC = () => {
                     <input 
                       type="number" 
                       className="form-input" 
-                      name="enterpriseAnnualPrice"
-                      value={settings.enterpriseAnnualPrice}
+                      name="enterprisePriceYearly"
+                      value={settings.enterprisePriceYearly}
                       onChange={handleChange}
                     />
                   </div>

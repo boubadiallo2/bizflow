@@ -186,6 +186,16 @@ export const adminTenantsService = {
   }).then(handleResponse),
 };
 
+export const platformSettingsService = {
+  getPublic: () => fetch(`${API_URL}/public/settings`).then(handleResponse),
+  getAdmin: () => fetch(`${API_URL}/admin/settings`, { headers: getAuthHeaders() }).then(handleResponse),
+  updateAdmin: (settings: any) => fetch(`${API_URL}/admin/settings`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(settings)
+  }).then(handleResponse)
+};
+
 export const authService = {
   login: async (credentials: any) => {
     const res = await fetch(`${API_URL}/auth/login`, {

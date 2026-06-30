@@ -5,8 +5,8 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from './db/index.js';
-import { products, clients, suppliers, sales, quotes, settings, tenants, users, invoices } from './db/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { tenants, users, products, clients, suppliers, sales, quotes, settings, invoices, platformSettings } from './db/schema.js';
+import { eq, like, desc, sql, and, gte, lte } from 'drizzle-orm';
 import { authenticateToken, requireAdmin, requireSubscription } from './middleware/auth.js';
 
 // Charge l'environnement
@@ -709,6 +709,59 @@ app.post('/api/settings', authenticateToken, requireTenant, async (req, res) => 
       const newItem = await db.insert(settings).values({ ...req.body, tenantId }).returning();
       res.json(newItem[0]);
     }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- PLATFORM SETTINGS (GLOBAL) ---
+const defaultPlatformSettings = {
+  starterPriceMonthly: 5000,
+  starterPriceYearly: 50000,
+  businessPriceMonthly: 10000,
+  businessPriceYearly: 80000,
+  enterprisePriceMonthly: 25000,
+  enterprisePriceYearly: 250000,
+  trialDays: 14,
+  allowRegistration: true
+};
+
+app.get('/api/public/settings', async (req, res) => {
+  try {
+    const data = await db.select().from(platformSettings).where(eq(platformSettings.id, 'global'));
+    if (data.length > 0) {
+      res.json({ ...defaultPlatformSettings, ...data[0].settings });
+    } else {
+      res.json(defaultPlatformSettings);
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/admin/settings', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const data = await db.select().from(platformSettings).where(eq(platformSettings.id, 'global'));
+    if (data.length > 0) {
+      res.json({ ...defaultPlatformSettings, ...data[0].settings });
+    } else {
+      res.json(defaultPlatformSettings);
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const newSettings = req.body;
+    const existing = await db.select().from(platformSettings).where(eq(platformSettings.id, 'global'));
+    if (existing.length > 0) {
+      await db.update(platformSettings).set({ settings: newSettings, updatedAt: new Date() }).where(eq(platformSettings.id, 'global'));
+    } else {
+      await db.insert(platformSettings).values({ id: 'global', settings: newSettings });
+    }
+    res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

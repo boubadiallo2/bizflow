@@ -121,3 +121,9 @@ export const invoices = pgTable('invoices', {
   opticData: jsonb('optic_data'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+export const platformSettings = pgTable('platform_settings', {
+  id: varchar('id', { length: 50 }).primaryKey(),
+  settings: jsonb('settings').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
