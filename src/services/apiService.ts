@@ -184,7 +184,12 @@ export const authService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
     });
-    return handleResponse(res);
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Identifiants incorrects.');
+    }
+    return res.json();
   },
   register: async (userData: any) => {
     const res = await fetch(`${API_URL}/auth/register`, {
@@ -192,6 +197,11 @@ export const authService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
     });
-    return handleResponse(res);
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Erreur lors de l\'inscription.');
+    }
+    return res.json();
   }
 };
