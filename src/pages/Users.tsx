@@ -27,19 +27,19 @@ export const Users: React.FC = () => {
   });
 
   const availableModules = [
-    { id: '/dashboard', label: 'Tableau de bord' },
-    { id: '/ventes', label: 'Ventes' },
-    { id: '/devis', label: 'Devis' },
-    { id: '/pos', label: 'Point de vente' },
-    { id: '/facturation', label: 'Facturation' },
-    { id: '/inventaire', label: 'Inventaire' },
-    { id: '/clients', label: 'Clients' },
-    { id: '/fournisseurs', label: 'Fournisseurs' },
-    { id: '/rapports', label: 'Rapports' },
-    { id: '/depenses', label: 'Dépenses' },
-    { id: '/abonnement', label: 'Abonnement' },
-    { id: '/parametres', label: 'Paramètres' }
-  ];
+    { id: '/dashboard', label: 'Tableau de bord', allowed: ['Starter', 'Business', 'Enterprise'] },
+    { id: '/ventes', label: 'Ventes', allowed: ['Starter', 'Business', 'Enterprise'] },
+    { id: '/devis', label: 'Devis', allowed: ['Business', 'Enterprise'] },
+    { id: '/pos', label: 'Point de vente', allowed: ['Starter', 'Business', 'Enterprise'] },
+    { id: '/facturation', label: 'Facturation', allowed: ['Business', 'Enterprise'] },
+    { id: '/inventaire', label: 'Inventaire', allowed: ['Starter', 'Business', 'Enterprise'] },
+    { id: '/clients', label: 'Clients', allowed: ['Starter', 'Business', 'Enterprise'] },
+    { id: '/fournisseurs', label: 'Fournisseurs', allowed: ['Business', 'Enterprise'] },
+    { id: '/rapports', label: 'Rapports', allowed: ['Business', 'Enterprise'] },
+    { id: '/depenses', label: 'Dépenses', allowed: ['Enterprise'] },
+    { id: '/abonnement', label: 'Abonnement', allowed: ['Starter', 'Business', 'Enterprise'] },
+    { id: '/parametres', label: 'Paramètres', allowed: ['Starter', 'Business', 'Enterprise'] }
+  ].filter(mod => mod.allowed.includes(subscription || 'Starter'));
 
   const fetchUsers = async () => {
     try {
