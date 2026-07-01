@@ -32,10 +32,14 @@ export const AdminAbonnements: React.FC = () => {
       const data = await adminTenantsService.getAll();
       setSubs(data.map((t: any) => {
         let amount = 0;
-        let nextBilling = 'Mensuel';
+        let nextBilling = t.subscriptionCycle === 'yearly' ? 'Annuel' : 'Mensuel';
         if (t.subscription === 'Starter') { amount = 5000; }
         else if (t.subscription === 'Business' || t.subscription === 'Pro') { amount = 10000; }
         else if (t.subscription === 'Enterprise') { amount = 25000; }
+
+        if (nextBilling === 'Annuel') {
+          amount = amount * 10; // Apply yearly discount (12 months for price of 10)
+        }
 
         return {
           ...t,

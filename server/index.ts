@@ -173,6 +173,7 @@ app.get('/api/admin/tenants', authenticateToken, requireAdmin, async (req, res) 
         lastLogin: 'N/A',
         transactions: 0,
         subscription: t.subscription || 'Starter',
+        subscriptionCycle: t.subscriptionCycle || 'monthly',
         status: t.status === 'Active' ? 'Actif' : t.status === 'Inactive' ? 'Bloqué' : t.status
       };
     });
