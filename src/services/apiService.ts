@@ -187,6 +187,11 @@ export const adminTenantsService = {
   }).then(handleResponse),
 };
 
+export const adminPaymentsService = {
+  getAll: () => getAll<any>('admin/payments'),
+  add: (data: any) => add('admin/payments', data)
+};
+
 export const platformSettingsService = {
   getPublic: () => fetch(`${API_URL}/public/settings`).then(handleResponse),
   getAdmin: () => fetch(`${API_URL}/admin/settings`, { headers: getAuthHeaders() }).then(handleResponse),

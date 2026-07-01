@@ -11,6 +11,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminClients } from './pages/admin/AdminClients';
 import { AdminAbonnements } from './pages/admin/AdminAbonnements';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminPaiements } from './pages/admin/AdminPaiements';
 
 import { Dashboard } from './pages/Dashboard';
 import { Clients } from './pages/Clients';
@@ -88,6 +89,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="clients" element={<AdminClients />} />
             <Route path="abonnements" element={<AdminAbonnements />} />
+            <Route path="paiements" element={<AdminPaiements />} />
             <Route path="parametres" element={<AdminSettings />} />
           </Route>
         </Routes>

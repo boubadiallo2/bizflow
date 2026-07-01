@@ -128,3 +128,15 @@ export const platformSettings = pgTable('platform_settings', {
   settings: jsonb('settings').notNull(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const tenantPayments = pgTable('tenant_payments', {
+  id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
+  amount: integer('amount').notNull(),
+  month: varchar('month', { length: 100 }).notNull(),
+  date: timestamp('date').defaultNow(),
+  paymentMethod: varchar('payment_method', { length: 100 }),
+  invoiceNumber: varchar('invoice_number', { length: 100 }).notNull(),
+  status: varchar('status', { length: 50 }).default('Paid'),
+  createdAt: timestamp('created_at').defaultNow(),
+});

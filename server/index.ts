@@ -5,7 +5,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from './db/index.js';
-import { tenants, users, products, clients, suppliers, sales, quotes, settings, invoices, platformSettings } from './db/schema.js';
+import { tenants, users, products, clients, suppliers, sales, quotes, settings, invoices, platformSettings, tenantPayments } from './db/schema.js';
 import { eq, like, desc, sql, and, gte, lte } from 'drizzle-orm';
 import { authenticateToken, requireAdmin, requireSubscription } from './middleware/auth.js';
 
@@ -161,6 +161,50 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // --- ADMIN ROUTES ---
+
+app.get('/api/admin/payments', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const allPayments = await db.select().from(tenantPayments).orderBy(desc(tenantPayments.createdAt));
+    const allTenants = await db.select().from(tenants);
+
+    const data = allPayments.map(p => {
+      const tenant = allTenants.find(t => t.id === p.tenantId);
+      return {
+        ...p,
+        tenantName: tenant ? tenant.name : 'Client Inconnu'
+      };
+    });
+
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/payments', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { tenantId, amount, month, paymentMethod } = req.body;
+    
+    // Generate invoice number
+    const count = await db.select({ id: tenantPayments.id }).from(tenantPayments);
+    const invoiceNumber = `FACT-SUB-${String(count.length + 1).padStart(4, '0')}`;
+
+    const newPayment = await db.insert(tenantPayments).values({
+      tenantId,
+      amount,
+      month,
+      paymentMethod: paymentMethod || 'Cash',
+      invoiceNumber,
+      status: 'Paid'
+    }).returning();
+
+    res.status(201).json(newPayment[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- TENANT ROUTES ---
 app.get('/api/admin/tenants', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const allTenants = await db.select().from(tenants);

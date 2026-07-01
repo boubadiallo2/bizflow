@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, Settings, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, Settings, ShieldAlert, Receipt } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
   return (
@@ -29,6 +29,10 @@ export const AdminSidebar: React.FC = () => {
         <NavLink to="/admin/abonnements" className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
           <CreditCard size={20} />
           <span>Abonnements & MRR</span>
+        </NavLink>
+        <NavLink to="/admin/paiements" className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
+          <Receipt size={20} />
+          <span>Paiements & Factures</span>
         </NavLink>
         <NavLink to="/admin/parametres" className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}>
           <Settings size={20} />
