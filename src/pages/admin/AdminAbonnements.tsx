@@ -32,7 +32,7 @@ export const AdminAbonnements: React.FC = () => {
       const data = await adminTenantsService.getAll();
       setSubs(data.map((t: any) => {
         let amount = 0;
-        let nextBilling = t.subscriptionCycle === 'yearly' ? 'Annuel' : 'Mensuel';
+        let nextBilling = (t.subscriptionCycle === 'yearly' || t.subscriptionCycle === 'annual') ? 'Annuel' : 'Mensuel';
         if (t.subscription === 'Starter') { amount = 5000; }
         else if (t.subscription === 'Business' || t.subscription === 'Pro') { amount = 10000; }
         else if (t.subscription === 'Enterprise') { amount = 25000; }
