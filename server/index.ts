@@ -142,8 +142,13 @@ app.post('/api/auth/login', async (req, res) => {
     let subscription = 'Starter';
     if (user.tenantId) {
       const tenantArray = await db.select().from(tenants).where(eq(tenants.id, user.tenantId));
-      if (tenantArray.length > 0 && tenantArray[0].subscription) {
-        subscription = tenantArray[0].subscription;
+      if (tenantArray.length > 0) {
+        if (tenantArray[0].status === 'Suspendu' || tenantArray[0].status === 'Inactive' || tenantArray[0].status === 'Bloqué') {
+          return res.status(403).json({ error: 'Compte suspendu, veuillez contacter l\'administrateur de la plateforme.' });
+        }
+        if (tenantArray[0].subscription) {
+          subscription = tenantArray[0].subscription;
+        }
       }
     }
 
