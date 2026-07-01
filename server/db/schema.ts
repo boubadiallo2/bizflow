@@ -25,6 +25,7 @@ export const products = pgTable('products', {
   id: serial('id').primaryKey(),
   tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
+  barcode: varchar('barcode', { length: 255 }),
   category: varchar('category', { length: 100 }),
   unit: varchar('unit', { length: 50 }),
   stock: integer('stock').default(0),

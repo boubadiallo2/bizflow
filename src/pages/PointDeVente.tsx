@@ -13,6 +13,7 @@ interface Product {
   priceValue: number;
   stock: number;
   imageUrl?: string;
+  barcode?: string;
 }
 
 
@@ -170,7 +171,8 @@ export const PointDeVente: React.FC = () => {
             price: p.vente || '0 F',
             priceValue: p.priceValue || parseInt((p.vente || '0').replace(/\D/g, '')) || 0,
             stock: p.stock || 0,
-            imageUrl: p.imageUrl
+            imageUrl: p.imageUrl,
+            barcode: p.barcode
           })));
         } else {
           setProducts([]);
@@ -242,10 +244,59 @@ export const PointDeVente: React.FC = () => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
   };
 
+  // --- Barcode Scanner Listener ---
+  useEffect(() => {
+    let barcodeBuffer = '';
+    let lastKeyTime = Date.now();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isCaisseOpen) return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        if (e.key === 'Enter') {
+          const product = products.find(p => p.barcode && p.barcode === searchQuery);
+          if (product) {
+            addToCart(product);
+            setSearchQuery('');
+            e.preventDefault();
+          }
+        }
+        return;
+      }
+
+      const currentTime = Date.now();
+      if (currentTime - lastKeyTime > 50) {
+        barcodeBuffer = '';
+      }
+      lastKeyTime = currentTime;
+
+      if (e.key === 'Enter') {
+        if (barcodeBuffer.length > 0) {
+          const product = products.find(p => p.barcode && p.barcode === barcodeBuffer);
+          if (product) {
+            addToCart(product);
+            showSuccess('Produit scanné', `${product.name} ajouté au panier`);
+          } else {
+            showError('Code inconnu', `Code-barres: ${barcodeBuffer}`);
+          }
+          barcodeBuffer = '';
+          e.preventDefault();
+        }
+      } else if (e.key.length === 1) {
+        barcodeBuffer += e.key;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [products, isCaisseOpen]);
+  // --------------------------------
+
   const availableCategories = Array.from(new Set(products.map(p => p.category || 'Général')));
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || (p.barcode && p.barcode.includes(searchQuery));
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });

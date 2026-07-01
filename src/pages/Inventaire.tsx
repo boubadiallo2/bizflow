@@ -16,6 +16,7 @@ interface ProductItem {
   vente: string;
   priceValue?: number;
   imageUrl?: string;
+  barcode?: string;
 }
 
 
@@ -31,7 +32,7 @@ export const Inventaire: React.FC = () => {
   const [stockModalType, setStockModalType] = useState<'in' | 'out'>('in');
   
   // Form state
-  const [newProduct, setNewProduct] = useState({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '', barcode: '' });
   const [stockMovement, setStockMovement] = useState({ productId: '', quantity: 0 });
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +68,8 @@ export const Inventaire: React.FC = () => {
           achat: newProduct.achat ? `${newProduct.achat} F` : '0 F',
           vente: newProduct.vente ? `${newProduct.vente} F` : '0 F',
           priceValue: Number(newProduct.vente) || 0,
-          imageUrl: newProduct.imageUrl
+          imageUrl: newProduct.imageUrl,
+          barcode: newProduct.barcode
         });
       } else {
         // Add mode
@@ -80,7 +82,8 @@ export const Inventaire: React.FC = () => {
           achat: newProduct.achat ? `${newProduct.achat} F` : '0 F',
           vente: newProduct.vente ? `${newProduct.vente} F` : '0 F',
           priceValue: Number(newProduct.vente) || 0,
-          imageUrl: newProduct.imageUrl
+          imageUrl: newProduct.imageUrl,
+          barcode: newProduct.barcode
         });
       }
       
@@ -91,7 +94,7 @@ export const Inventaire: React.FC = () => {
       
       showSuccess("Succès", "Produit sauvegardé avec succès !");
       setIsProductModalOpen(false);
-      setNewProduct({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '' });
+      setNewProduct({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '', barcode: '' });
       setEditingProductId(null);
     } catch (error) {
       console.error("Erreur lors de la sauvegarde du produit :", error);
@@ -103,7 +106,7 @@ export const Inventaire: React.FC = () => {
 
   const openNewProductModal = () => {
     setEditingProductId(null);
-    setNewProduct({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '' });
+    setNewProduct({ name: '', category: '', vente: '', achat: '', stock: 0, minStock: 5, imageUrl: '', barcode: '' });
     setIsProductModalOpen(true);
   };
 
@@ -127,7 +130,8 @@ export const Inventaire: React.FC = () => {
       achat: product.achat.replace(/\D/g, ''),
       stock: product.stock,
       minStock: product.minStock,
-      imageUrl: product.imageUrl || ''
+      imageUrl: product.imageUrl || '',
+      barcode: product.barcode || ''
     });
     setIsProductModalOpen(true);
   };
@@ -350,6 +354,10 @@ export const Inventaire: React.FC = () => {
                 <div className="form-group" style={{ marginBottom: '16px' }}>
                   <label>Nom du produit</label>
                   <input type="text" className="form-input" required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})} placeholder="Ex: T-shirt blanc" />
+                </div>
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label>Code-barres (Scanner ici)</label>
+                  <input type="text" className="form-input" value={newProduct.barcode} onChange={e => setNewProduct({...newProduct, barcode: e.target.value})} placeholder="Scannez ou entrez manuellement" />
                 </div>
                 <div className="form-group" style={{ marginBottom: '16px' }}>
                   <label>Catégorie</label>
