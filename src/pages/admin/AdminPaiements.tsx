@@ -3,6 +3,8 @@ import { Search, Plus, Download, Receipt, Building2 } from 'lucide-react';
 import { adminPaymentsService, adminTenantsService } from '../../services/apiService';
 import { generateSubscriptionInvoice } from '../../utils/invoiceGenerator';
 import Swal from 'sweetalert2';
+import './AdminAbonnements.css';
+import './AdminPaiements.css';
 
 export const AdminPaiements: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);
