@@ -76,7 +76,7 @@ export const generateSubscriptionInvoice = (payment: any) => {
   container.innerHTML = invoiceHtml;
   document.body.appendChild(container);
 
-  const opt = {
+  const opt: any = {
     margin:       10,
     filename:     `Facture_${payment.invoiceNumber}.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },

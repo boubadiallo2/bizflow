@@ -60,7 +60,7 @@ export const AdminPaiements: React.FC = () => {
       loadData();
     } catch (error) {
       console.error(error);
-      Swal.fire('Erreur', 'Erreur lors de l\\'enregistrement', 'error');
+      Swal.fire('Erreur', "Erreur lors de l'enregistrement", 'error');
     }
   };
 
