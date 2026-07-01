@@ -303,3 +303,13 @@ button {
   }
 }
 
+/* SweetAlert2 Overrides */
+.swal2-actions {
+  gap: 16px;
+  display: flex !important;
+  justify-content: center;
+}
+
+.swal-nexora-popup .btn {
+  margin: 0 !important;
+}
