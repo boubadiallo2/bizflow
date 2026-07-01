@@ -167,6 +167,7 @@ export const expensesService = {
 export const settingsService = {
   get: () => getById<any>('settings', 'company'),
   save: (data: any) => add('settings', data), 
+  updateSubscription: (data: any) => add('settings/subscription', data),
 };
 
 export const usersService = {

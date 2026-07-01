@@ -39,15 +39,23 @@ export const Abonnement: React.FC = () => {
         let freqText = 'Mensuel';
         if (data?.tenantCreatedAt) {
           const createdAt = new Date(data.tenantCreatedAt);
-          const nextMonth = new Date(createdAt);
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-          setRenewalDate(nextMonth.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }));
+          const cycle = data.tenantSubscriptionCycle || 'monthly';
+          const nextDate = new Date(createdAt);
+          
+          if (cycle === 'annual') {
+            nextDate.setFullYear(nextDate.getFullYear() + 1);
+          } else {
+            nextDate.setMonth(nextDate.getMonth() + 1);
+          }
+          
+          setRenewalDate(nextDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }));
           
           const now = new Date();
-          const diffTime = nextMonth.getTime() - now.getTime();
+          const diffTime = nextDate.getTime() - now.getTime();
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const cycleText = cycle === 'annual' ? 'Annuel' : 'Mensuel';
           if (diffDays > 0) {
-            freqText = `Mensuel (${diffDays} jours restants)`;
+            freqText = `${cycleText} (${diffDays} jours restants)`;
           } else {
             freqText = `Expiré`;
           }
@@ -91,18 +99,21 @@ export const Abonnement: React.FC = () => {
   }, []);
 
   const handlePayment = async () => {
-    // Simulate payment and save to Firebase
-    await settingsService.save({ subscription: 'Business' });
+    // Simulate payment and save
+    await settingsService.updateSubscription({ subscription: 'Business', subscriptionCycle: billingCycle });
     setPlan({
       name: 'Plan Business',
       icon: <Rocket size={28} className="text-primary" />,
       color: 'text-primary',
       freq: billingCycle === 'annual' ? 'Annuel (Payé)' : 'Mensuel (Payé)',
-      features: ['Produits illimités', 'Clients illimités', 'Transactions illimitées', 'Multi-utilisateurs', 'POS avancé', 'Export PDF & Rapports complets']
+      features: ['Produits illimités', 'Clients illimités', 'Transactions illimitées', 'Multi-utilisateurs (5 max)', 'POS avancé', 'Export PDF & Rapports complets']
     });
     setIsUpgradeModalOpen(false);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    setTimeout(() => {
+      setShowToast(false);
+      window.location.reload();
+    }, 2000);
   };
 
   return (

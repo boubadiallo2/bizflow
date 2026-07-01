@@ -5,6 +5,7 @@ export const tenants = pgTable('tenants', {
   name: varchar('name', { length: 255 }).notNull(),
   commerceType: varchar('commerce_type', { length: 100 }),
   subscription: varchar('subscription', { length: 50 }).default('Starter'),
+  subscriptionCycle: varchar('subscription_cycle', { length: 50 }).default('monthly'),
   status: varchar('status', { length: 50 }).default('Active'),
   createdAt: timestamp('created_at').defaultNow(),
 });

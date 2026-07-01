@@ -685,11 +685,11 @@ app.get('/api/settings', authenticateToken, requireTenant, async (req, res) => {
   try {
     const tenantId = req.user!.tenantId!;
     const data = await db.select().from(settings).where(eq(settings.tenantId, tenantId));
-    const tenantData = await db.select({ createdAt: tenants.createdAt, subscription: tenants.subscription }).from(tenants).where(eq(tenants.id, tenantId));
+    const tenantData = await db.select({ createdAt: tenants.createdAt, subscription: tenants.subscription, subscriptionCycle: tenants.subscriptionCycle }).from(tenants).where(eq(tenants.id, tenantId));
     
     let result = data[0] || {};
     if (tenantData.length > 0) {
-      result = { ...result, tenantCreatedAt: tenantData[0].createdAt, tenantSubscription: tenantData[0].subscription };
+      result = { ...result, tenantCreatedAt: tenantData[0].createdAt, tenantSubscription: tenantData[0].subscription, tenantSubscriptionCycle: tenantData[0].subscriptionCycle };
     }
     res.json(result);
   } catch (err: any) {
@@ -709,6 +709,20 @@ app.post('/api/settings', authenticateToken, requireTenant, async (req, res) => 
       const newItem = await db.insert(settings).values({ ...req.body, tenantId }).returning();
       res.json(newItem[0]);
     }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/settings/subscription', authenticateToken, requireTenant, async (req, res) => {
+  try {
+    const tenantId = req.user!.tenantId!;
+    const { subscription, subscriptionCycle } = req.body;
+    const updated = await db.update(tenants)
+      .set({ subscription, subscriptionCycle })
+      .where(eq(tenants.id, tenantId))
+      .returning();
+    res.json(updated[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
