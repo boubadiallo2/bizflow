@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Unlock, ShoppingBag, CreditCard, X, Lock, Trash2, Plus, Minus, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Search, Unlock, ShoppingBag, CreditCard, X, Lock, Trash2, Plus, Minus, CheckCircle, AlertTriangle, Download } from 'lucide-react';
 import { Button } from '../components/Button';
 import { productsService, salesService, settingsService } from '../services/apiService';
+import html2pdf from 'html2pdf.js';
 import { showConfirm, showSuccess, showError } from '../utils/notifications';
 import './PointDeVente.css';
 
@@ -74,6 +75,12 @@ export const PointDeVente: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportPeriod, setExportPeriod] = useState('today');
+  const [exportConfig, setExportConfig] = useState({
+    openingHour: '08:00',
+    closingHour: '20:00'
+  });
   
   // New States for Search, Category, and Cart calculations
   const [searchQuery, setSearchQuery] = useState('');
@@ -371,6 +378,101 @@ export const PointDeVente: React.FC = () => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  const handleExportPDF = async () => {
+    try {
+      const [salesData, settingsData] = await Promise.all([
+        salesService.getAll(),
+        settingsService.get()
+      ]);
+      
+      const now = new Date();
+      const reportSales = salesData.filter((s: any) => {
+        const saleDate = new Date(s.date);
+        if (exportPeriod === 'today') {
+          return saleDate.toDateString() === now.toDateString();
+        } else if (exportPeriod === 'month') {
+          return saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear();
+        } else if (exportPeriod === 'year') {
+          return saleDate.getFullYear() === now.getFullYear();
+        }
+        return true;
+      });
+
+      const total = reportSales.reduce((acc: number, s: any) => acc + (Number(s.amount) || 0), 0);
+      
+      let periodText = '';
+      if (exportPeriod === 'today') periodText = 'du jour';
+      else if (exportPeriod === 'month') periodText = 'du mois';
+      else if (exportPeriod === 'year') periodText = 'de l\\'année';
+
+      const element = document.createElement('div');
+      element.innerHTML = \`
+        <div style="padding: 40px; font-family: sans-serif; color: #333;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            \${settingsData?.logo ? \`<img src="\${settingsData.logo}" style="max-height: 80px; margin-bottom: 10px;" />\` : ''}
+            <h1 style="font-size: 24px; margin: 0;">\${settingsData?.name || 'Notre Boutique'}</h1>
+            <p style="margin: 5px 0; color: #666;">\${settingsData?.address || ''}</p>
+            <p style="margin: 5px 0; font-size: 14px;">Heures d'ouverture : \${exportConfig.openingHour} - \${exportConfig.closingHour}</p>
+          </div>
+          
+          <h2 style="font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+            Rapport des ventes \${periodText}
+          </h2>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; flex: 1; margin-right: 15px;">
+              <div style="font-size: 12px; color: #64748b; text-transform: uppercase;">Total Ventes</div>
+              <div style="font-size: 24px; font-weight: bold;">\${total.toLocaleString('fr-FR')} F</div>
+            </div>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; flex: 1;">
+              <div style="font-size: 12px; color: #64748b; text-transform: uppercase;">Transactions</div>
+              <div style="font-size: 24px; font-weight: bold;">\${reportSales.length}</div>
+            </div>
+          </div>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+            <thead>
+              <tr style="background-color: #f1f5f9;">
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #cbd5e1;">Date & Heure</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #cbd5e1;">Ticket N°</th>
+                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #cbd5e1;">Méthode</th>
+                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #cbd5e1;">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              \${reportSales.map((s: any) => \`
+                <tr>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">\${new Date(s.date).toLocaleString()}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">\${s.ticketId}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">\${s.method || 'Espèces'}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; text-align: right; font-weight: 500;">\${Number(s.amount).toLocaleString('fr-FR')} F</td>
+                </tr>
+              \`).join('')}
+              \${reportSales.length === 0 ? '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #64748b;">Aucune vente pour cette période.</td></tr>' : ''}
+            </tbody>
+          </table>
+          
+          <div style="margin-top: 50px; font-size: 12px; color: #94a3b8; text-align: center;">
+            Document généré le \${new Date().toLocaleString('fr-FR')}
+          </div>
+        </div>
+      \`;
+
+      html2pdf().from(element).set({
+        margin: 10,
+        filename: \`rapport_ventes_\${exportPeriod}.pdf\`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).save();
+      
+      setIsExportModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      showError("Erreur", "Impossible de générer le rapport");
+    }
+  };
+
   return (
     <div className="pos-layout">
       {/* Main Content Area */}
@@ -378,6 +480,14 @@ export const PointDeVente: React.FC = () => {
         <div className="pos-header">
           <h2>Point de vente</h2>
           <div style={{ display: 'flex', gap: '12px' }}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsExportModalOpen(true)}
+              style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+            >
+              <Download size={16} style={{ marginRight: '6px' }} />
+              Rapport Ventes
+            </Button>
             <Button 
               variant="outline" 
               onClick={handleGenerateProducts} 
@@ -780,6 +890,56 @@ export const PointDeVente: React.FC = () => {
                 <Button variant="primary" onClick={() => { window.print(); }} style={{ width: '100%', justifyContent: 'center' }}>Imprimer le reçu</Button>
                 <Button variant="secondary" onClick={handleCloseReceipt} style={{ width: '100%', justifyContent: 'center', border: '1px solid var(--color-border)', background: 'transparent' }}>Continuer la vente</Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Export */}
+      {isExportModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3>Télécharger rapport</h3>
+              <button className="close-btn" onClick={() => setIsExportModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label>Période du rapport</label>
+                <select 
+                  className="form-input" 
+                  value={exportPeriod} 
+                  onChange={e => setExportPeriod(e.target.value)}
+                >
+                  <option value="today">Aujourd'hui</option>
+                  <option value="month">Ce mois</option>
+                  <option value="year">Cette année</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label>Heure d'ouverture</label>
+                <input 
+                  type="time" 
+                  className="form-input" 
+                  value={exportConfig.openingHour}
+                  onChange={e => setExportConfig({...exportConfig, openingHour: e.target.value})}
+                />
+              </div>
+              <div className="form-group">
+                <label>Heure de fermeture</label>
+                <input 
+                  type="time" 
+                  className="form-input" 
+                  value={exportConfig.closingHour}
+                  onChange={e => setExportConfig({...exportConfig, closingHour: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <Button variant="secondary" onClick={() => setIsExportModalOpen(false)} style={{ border: '1px solid var(--color-border)', backgroundColor: 'transparent' }}>Annuler</Button>
+              <Button variant="primary" icon={<Download size={16} />} onClick={handleExportPDF}>Télécharger</Button>
             </div>
           </div>
         </div>
