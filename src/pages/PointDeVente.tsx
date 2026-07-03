@@ -403,30 +403,30 @@ export const PointDeVente: React.FC = () => {
       let periodText = '';
       if (exportPeriod === 'today') periodText = 'du jour';
       else if (exportPeriod === 'month') periodText = 'du mois';
-      else if (exportPeriod === 'year') periodText = 'de l\\'année';
+      else if (exportPeriod === 'year') periodText = "de l'année";
 
       const element = document.createElement('div');
-      element.innerHTML = \`
+      element.innerHTML = `
         <div style="padding: 40px; font-family: sans-serif; color: #333;">
           <div style="text-align: center; margin-bottom: 30px;">
-            \${settingsData?.logo ? \`<img src="\${settingsData.logo}" style="max-height: 80px; margin-bottom: 10px;" />\` : ''}
-            <h1 style="font-size: 24px; margin: 0;">\${settingsData?.name || 'Notre Boutique'}</h1>
-            <p style="margin: 5px 0; color: #666;">\${settingsData?.address || ''}</p>
-            <p style="margin: 5px 0; font-size: 14px;">Heures d'ouverture : \${exportConfig.openingHour} - \${exportConfig.closingHour}</p>
+            ${settingsData?.logo ? `<img src="${settingsData.logo}" style="max-height: 80px; margin-bottom: 10px;" />` : ''}
+            <h1 style="font-size: 24px; margin: 0;">${settingsData?.name || 'Notre Boutique'}</h1>
+            <p style="margin: 5px 0; color: #666;">${settingsData?.address || ''}</p>
+            <p style="margin: 5px 0; font-size: 14px;">Heures d'ouverture : ${exportConfig.openingHour} - ${exportConfig.closingHour}</p>
           </div>
           
           <h2 style="font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
-            Rapport des ventes \${periodText}
+            Rapport des ventes ${periodText}
           </h2>
           
           <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; flex: 1; margin-right: 15px;">
               <div style="font-size: 12px; color: #64748b; text-transform: uppercase;">Total Ventes</div>
-              <div style="font-size: 24px; font-weight: bold;">\${total.toLocaleString('fr-FR')} F</div>
+              <div style="font-size: 24px; font-weight: bold;">${total.toLocaleString('fr-FR')} F</div>
             </div>
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; flex: 1;">
               <div style="font-size: 12px; color: #64748b; text-transform: uppercase;">Transactions</div>
-              <div style="font-size: 24px; font-weight: bold;">\${reportSales.length}</div>
+              <div style="font-size: 24px; font-weight: bold;">${reportSales.length}</div>
             </div>
           </div>
           
@@ -440,27 +440,27 @@ export const PointDeVente: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              \${reportSales.map((s: any) => \`
+              ${reportSales.map((s: any) => `
                 <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">\${new Date(s.date).toLocaleString()}</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">\${s.ticketId}</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">\${s.method || 'Espèces'}</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; text-align: right; font-weight: 500;">\${Number(s.amount).toLocaleString('fr-FR')} F</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">${new Date(s.date).toLocaleString()}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">${s.ticketId}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">${s.method || 'Espèces'}</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; text-align: right; font-weight: 500;">${Number(s.amount).toLocaleString('fr-FR')} F</td>
                 </tr>
-              \`).join('')}
-              \${reportSales.length === 0 ? '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #64748b;">Aucune vente pour cette période.</td></tr>' : ''}
+              `).join('')}
+              ${reportSales.length === 0 ? '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #64748b;">Aucune vente pour cette période.</td></tr>' : ''}
             </tbody>
           </table>
           
           <div style="margin-top: 50px; font-size: 12px; color: #94a3b8; text-align: center;">
-            Document généré le \${new Date().toLocaleString('fr-FR')}
+            Document généré le ${new Date().toLocaleString('fr-FR')}
           </div>
         </div>
-      \`;
+      `;
 
       html2pdf().from(element).set({
         margin: 10,
-        filename: \`rapport_ventes_\${exportPeriod}.pdf\`,
+        filename: `rapport_ventes_${exportPeriod}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }

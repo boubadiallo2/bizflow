@@ -61,7 +61,7 @@ export const Rapports: React.FC = () => {
     let periodText = '';
     if (period === 'today') periodText = 'du jour';
     else if (period === 'month') periodText = 'du mois';
-    else if (period === 'year') periodText = 'de l\\'année';
+    else if (period === 'year') periodText = 'de l\'année';
     else if (period === 'week') periodText = 'de la semaine';
 
     const element = document.createElement('div');
@@ -119,7 +119,7 @@ export const Rapports: React.FC = () => {
 
     html2pdf().from(element).set({
       margin: 10,
-      filename: \`rapport_ventes_\${period}.pdf\`,
+      filename: `rapport_ventes_${period}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
