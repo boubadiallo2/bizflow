@@ -84,7 +84,7 @@ export const Abonnement: React.FC = () => {
             icon: <Crown size={28} style={{ color: '#f59e0b' }} />,
             color: 'text-warning',
             freq: freqText,
-            features: ['Toutes les fonctions Business', 'Gestion des Dépenses', 'Support Prioritaire', 'Utilisateurs illimités']
+            features: ['Toutes les fonctions Business', 'Gestion des Dépenses', 'Support Prioritaire', 'Utilisateurs illimités', 'Multi-boutiques']
           });
         }
       } catch (e) {
