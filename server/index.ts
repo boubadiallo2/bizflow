@@ -5,7 +5,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from './db/index.js';
-import { tenants, users, products, clients, suppliers, sales, quotes, settings, invoices, platformSettings, tenantPayments } from './db/schema.js';
+import { tenants, users, products, clients, suppliers, sales, quotes, settings, invoices, platformSettings, tenantPayments, stores } from './db/schema.js';
 import { eq, like, desc, sql, and, gte, lte } from 'drizzle-orm';
 import { authenticateToken, requireAdmin, requireSubscription } from './middleware/auth.js';
 
@@ -724,6 +724,53 @@ app.delete('/api/invoices/:id', authenticateToken, requireTenant, requireSubscri
   try {
     const id = parseInt(req.params.id);
     await db.delete(invoices).where(and(eq(invoices.id, id), eq(invoices.tenantId, req.user!.tenantId!)));
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- STORES (Multi-Boutiques) ---
+app.get('/api/stores', authenticateToken, requireTenant, requireSubscription(['Enterprise']), async (req, res) => {
+  try {
+    const data = await db.select().from(stores).where(eq(stores.tenantId, req.user!.tenantId!));
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/stores', authenticateToken, requireTenant, requireSubscription(['Enterprise']), async (req, res) => {
+  try {
+    const payload = { ...req.body, tenantId: req.user!.tenantId! };
+    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
+    const newItem = await db.insert(stores).values(payload).returning();
+    res.json(newItem[0]);
+  } catch (err: any) {
+    console.error("Erreur POST /api/stores:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/stores/:id', authenticateToken, requireTenant, requireSubscription(['Enterprise']), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const payload = { ...req.body };
+    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
+    const updated = await db.update(stores)
+      .set(payload)
+      .where(and(eq(stores.id, id), eq(stores.tenantId, req.user!.tenantId!)))
+      .returning();
+    res.json(updated[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/stores/:id', authenticateToken, requireTenant, requireSubscription(['Enterprise']), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(stores).where(and(eq(stores.id, id), eq(stores.tenantId, req.user!.tenantId!)));
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

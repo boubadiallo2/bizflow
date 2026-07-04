@@ -35,6 +35,7 @@ const navItems = [
   { path: '/rapports', icon: PieChart, label: 'Rapports', allowed: ['Business', 'Enterprise'] },
   { path: '/depenses', icon: Wallet, label: 'Dépenses', allowed: ['Enterprise'] },
   { path: '/users', icon: UserCog, label: 'Utilisateurs', allowed: ['Business', 'Enterprise'], adminOnly: true },
+  { path: '/boutiques', icon: Store, label: 'Boutiques', allowed: ['Enterprise'] },
   { path: '/abonnement', icon: CreditCard, label: 'Abonnement', allowed: ['Starter', 'Business', 'Enterprise'] },
   { path: '/parametres', icon: Settings, label: 'Paramètres', allowed: ['Starter', 'Business', 'Enterprise'] },
 ];

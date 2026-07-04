@@ -26,6 +26,7 @@ import { Rapports } from './pages/Rapports';
 import { Parametres } from './pages/Parametres';
 import { Depenses } from './pages/Depenses';
 import { Users } from './pages/Users';
+import { Boutiques } from './pages/Boutiques';
 
 import { LandingPage } from './pages/LandingPage';
 import { TermsPage } from './pages/TermsPage';
@@ -79,6 +80,11 @@ function App() {
             <Route path="users" element={
               <SubscriptionGuard allowedSubscriptions={['Business', 'Enterprise']}>
                 <Users />
+              </SubscriptionGuard>
+            } />
+            <Route path="boutiques" element={
+              <SubscriptionGuard allowedSubscriptions={['Enterprise']}>
+                <Boutiques />
               </SubscriptionGuard>
             } />
             <Route path="parametres" element={<Parametres />} />

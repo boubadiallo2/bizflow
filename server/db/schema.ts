@@ -141,3 +141,14 @@ export const tenantPayments = pgTable('tenant_payments', {
   status: varchar('status', { length: 50 }).default('Paid'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+export const stores = pgTable('stores', {
+  id: serial('id').primaryKey(),
+  tenantId: integer('tenant_id').references(() => tenants.id).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  location: text('location'),
+  phone: varchar('phone', { length: 50 }),
+  manager: varchar('manager', { length: 255 }),
+  status: varchar('status', { length: 50 }).default('Actif'),
+  createdAt: timestamp('created_at').defaultNow(),
+});

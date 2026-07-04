@@ -177,6 +177,14 @@ export const usersService = {
   remove: (id: string | number) => remove('users', id),
 };
 
+export const storesService = {
+  getAll: () => getAll<any>('stores'),
+  getById: (id: string | number) => getById<any>('stores', id),
+  add: (data: any) => add('stores', data),
+  update: (id: string | number, data: any) => update('stores', id, data),
+  remove: (id: string | number) => remove('stores', id),
+};
+
 export const adminTenantsService = {
   getAll: () => getAll<any>('admin/tenants'),
   getDashboardStats: () => fetch(`${API_URL}/admin/dashboard-stats`, { headers: getAuthHeaders() }).then(handleResponse),
