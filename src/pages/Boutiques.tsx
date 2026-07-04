@@ -153,10 +153,10 @@ export const Boutiques: React.FC = () => {
               </div>
               
               <div className="boutique-actions">
-                <Button variant="ghost" onClick={() => openModal(store)} className="text-primary hover:bg-primary-light p-2">
+                <Button variant="outline" onClick={() => openModal(store)} className="text-primary hover:bg-primary-light p-2">
                   <Edit2 size={16} />
                 </Button>
-                <Button variant="ghost" onClick={() => handleDelete(store.id)} className="text-danger hover:bg-danger-light p-2">
+                <Button variant="outline" onClick={() => handleDelete(store.id)} className="text-danger hover:bg-danger-light p-2">
                   <Trash2 size={16} />
                 </Button>
               </div>
