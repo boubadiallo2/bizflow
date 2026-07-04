@@ -166,72 +166,72 @@ export const Boutiques: React.FC = () => {
       )}
 
       {isModalOpen && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="modal-content" style={{ backgroundColor: 'var(--color-surface)', padding: '24px', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '500px', animation: 'slideUp 0.3s ease' }}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{editingStore ? 'Modifier la boutique' : 'Nouvelle boutique'}</h3>
-              <button onClick={closeModal} className="text-muted hover:text-text bg-transparent border-none cursor-pointer p-1">
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>{editingStore ? 'Modifier la boutique' : 'Nouvelle boutique'}</h3>
+              <button onClick={closeModal} className="close-btn" type="button">
                 <X size={20} />
               </button>
             </div>
             
-            <form onSubmit={handleSubmit}>
-              <div className="form-group mb-4">
-                <label className="block text-sm font-medium mb-1">Nom de la boutique *</label>
+            <form onSubmit={handleSubmit} className="modal-body">
+              <div className="form-group">
+                <label>Nom de la boutique *</label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full p-2 border border-border rounded-md focus:border-primary focus:outline-none"
+                  className="form-input"
                   placeholder="Ex: Boutique Dakar Plateau"
                 />
               </div>
               
-              <div className="form-group mb-4">
-                <label className="block text-sm font-medium mb-1">Localisation / Adresse</label>
+              <div className="form-group">
+                <label>Localisation / Adresse</label>
                 <input
                   type="text"
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-border rounded-md focus:border-primary focus:outline-none"
+                  className="form-input"
                   placeholder="Ex: 123 Rue de la Paix"
                 />
               </div>
               
-              <div className="form-group mb-4">
-                <label className="block text-sm font-medium mb-1">Téléphone</label>
+              <div className="form-group">
+                <label>Téléphone</label>
                 <input
                   type="text"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-border rounded-md focus:border-primary focus:outline-none"
+                  className="form-input"
                   placeholder="Ex: +221 77 123 45 67"
                 />
               </div>
               
-              <div className="form-group mb-4">
-                <label className="block text-sm font-medium mb-1">Gérant</label>
+              <div className="form-group">
+                <label>Gérant</label>
                 <input
                   type="text"
                   name="manager"
                   value={formData.manager}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-border rounded-md focus:border-primary focus:outline-none"
+                  className="form-input"
                   placeholder="Ex: Moussa Diop"
                 />
               </div>
               
-              <div className="form-group mb-6">
-                <label className="block text-sm font-medium mb-1">Statut</label>
+              <div className="form-group">
+                <label>Statut</label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-border rounded-md focus:border-primary focus:outline-none"
+                  className="form-input"
                 >
                   <option value="Actif">Actif</option>
                   <option value="Inactif">Inactif</option>
@@ -239,7 +239,7 @@ export const Boutiques: React.FC = () => {
                 </select>
               </div>
               
-              <div className="flex justify-end gap-3">
+              <div className="modal-footer">
                 <Button variant="secondary" type="button" onClick={closeModal}>Annuler</Button>
                 <Button variant="primary" type="submit">Enregistrer</Button>
               </div>
